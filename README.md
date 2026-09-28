@@ -19,17 +19,19 @@ project. This repository tracks the `4.5` branch.
 
 ```sh
 git submodule update --init --recursive
-python3 -m scons platform=macos arch=arm64
+python3 -m venv .venv
+.venv/bin/python -m pip install scons
+.venv/bin/scons platform=macos arch=arm64
 ```
 
 Build commands for other common platforms:
 
 ```sh
 # Linux
-python3 -m scons platform=linux
+.venv/bin/scons platform=linux
 
 # Windows (run in a Visual Studio developer shell)
-python -m scons platform=windows
+.venv/Scripts/scons platform=windows
 ```
 
 After building, open `project.godot` in Godot and press **F6** or **F5**.
@@ -40,7 +42,7 @@ The default build is a debug build. Re-run the matching SCons command whenever
 the C++ code changes. To make an optimized build:
 
 ```sh
-python3 -m scons platform=macos arch=arm64 target=template_release
+.venv/bin/scons platform=macos arch=arm64 target=template_release
 ```
 
 ## Layout
@@ -50,4 +52,3 @@ python3 -m scons platform=macos arch=arm64 target=template_release
 - `escape_from_brothersk.gdextension` — native library configuration
 - `SConstruct` — native build configuration
 - `godot-cpp/` — official bindings, included as a Git submodule
-

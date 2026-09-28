@@ -1,5 +1,6 @@
 #include "player.h"
 
+#include <godot_cpp/classes/global_constants.hpp>
 #include <godot_cpp/classes/input.hpp>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/math.hpp>
@@ -16,7 +17,24 @@ void Player::_bind_methods() {
 
 void Player::_process(double delta) {
     Input *input = Input::get_singleton();
-    Vector2 direction = input->get_vector("move_left", "move_right", "move_up", "move_down");
+    Vector2 direction;
+
+    if (input->is_physical_key_pressed(KEY_A) || input->is_key_pressed(KEY_LEFT)) {
+        direction.x -= 1.0f;
+    }
+    if (input->is_physical_key_pressed(KEY_D) || input->is_key_pressed(KEY_RIGHT)) {
+        direction.x += 1.0f;
+    }
+    if (input->is_physical_key_pressed(KEY_W) || input->is_key_pressed(KEY_UP)) {
+        direction.y -= 1.0f;
+    }
+    if (input->is_physical_key_pressed(KEY_S) || input->is_key_pressed(KEY_DOWN)) {
+        direction.y += 1.0f;
+    }
+
+    if (direction.length_squared() > 1.0f) {
+        direction = direction.normalized();
+    }
 
     Vector2 next_position = get_position() + direction * speed * delta;
     const Vector2 viewport_size = get_viewport_rect().size;
