@@ -1,0 +1,23 @@
+# Godot-generated files
+.godot/
+
+# Native build output
+bin/*
+!bin/.gitkeep
+*.o
+*.os
+*.obj
+*.a
+*.so
+*.dylib
+*.dll
+*.pdb
+
+# SCons
+.sconsign.dblite
+
+# Editors and OS files
+.DS_Store
+.idea/
+.vscode/
+.venv/
