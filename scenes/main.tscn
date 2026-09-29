@@ -1,4 +1,6 @@
-[gd_scene format=3]
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
 
 [node name="Main" type="Node2D"]
 
@@ -26,6 +28,7 @@ theme_override_colors/font_color = Color(0.48, 0.56, 0.7, 1)
 theme_override_font_sizes/font_size = 15
 text = "Move with WASD or arrow keys"
 
-[node name="Player" type="Player" parent="."]
+[node name="Player" type="Node2D" parent="."]
 position = Vector2(576, 324)
+script = ExtResource("1_player")
 

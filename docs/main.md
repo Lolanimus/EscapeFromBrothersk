@@ -8,7 +8,7 @@ As a main character you are trying to escape the jail. The whole game is several
 Pixel art. Soviet style.
 
 # Tech stack
-C++ Godot 4.5
+GDScript, Godot 4.5
 
 # Git workflow
 Create a branch for each feature. Whenever you work on a specific feature you must make sure that no one else is working on it; or if you are working on a feature collaberatively, make sure that you communicate clearly with your teammate and separate concerns within the feature.

@@ -1,54 +1,31 @@
 # Escape from Brothersk
 
-A small 2D game starter built with **Godot 4.5** and **C++ via GDExtension**.
+A small 2D game starter built with **Godot 4.5** and **GDScript**.
 
-The starter opens to a playable screen with a native C++ player. Move the blue
-circle with `WASD` or the arrow keys.
+Move the blue circle with `WASD` or the arrow keys. Movement is normalized
+diagonally and the player stays within the viewport.
 
 ## Requirements
 
-- Godot 4.5
-- Git
-- Python 3 and SCons (`python3 -m pip install scons`)
-- A C++ compiler (Xcode command-line tools, GCC, or MSVC)
-
-The `godot-cpp` version should match the Godot minor version used to open the
-project. This repository tracks the `4.5` branch.
+- Godot 4.5 (standard edition)
 
 ## First-time setup
 
-```sh
-git submodule update --init --recursive
-python3 -m venv .venv
-.venv/bin/python -m pip install scons
-.venv/bin/scons platform=macos arch=arm64
-```
+1. Clone or download this repository.
+2. Import `project.godot` in Godot.
+3. Open the project and press **F5** to run.
 
-Build commands for other common platforms:
+No native compiler, build step, or submodule setup is required.
 
-```sh
-# Linux
-.venv/bin/scons platform=linux
+## Development
 
-# Windows (run in a Visual Studio developer shell)
-.venv/Scripts/scons platform=windows
-```
-
-After building, open `project.godot` in Godot and press **F6** or **F5**.
-
-## Development builds
-
-The default build is a debug build. Re-run the matching SCons command whenever
-the C++ code changes. To make an optimized build:
-
-```sh
-.venv/bin/scons platform=macos arch=arm64 target=template_release
-```
+Edit `scripts/player.gd` in Godot's script editor. Select the Player node in
+`scenes/main.tscn` to adjust its exported `speed` property in the Inspector.
+Movement actions are configured under **Project > Project Settings > Input Map**.
 
 ## Layout
 
-- `src/` — native game code and GDExtension registration
+- `scripts/` — GDScript game code
 - `scenes/` — Godot scenes
-- `escape_from_brothersk.gdextension` — native library configuration
-- `SConstruct` — native build configuration
-- `godot-cpp/` — official bindings, included as a Git submodule
+- `project.godot` — project settings and input actions
+- `docs/` — game design notes
