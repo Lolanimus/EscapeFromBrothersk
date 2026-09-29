@@ -1,31 +1,17 @@
-# Escape from Brothersk
+## Game Overview
+Escape From Borthersk - is a 2D Hotline Miami-type of game, where you as a main character live in Russia in the year of 2020 in the city of Brothersk and political situation is not promising. You saw an announcement about the protest going on near you and you decide to go there. You protest there for some time but then you get bitten up by Russian Policemen and get thrown into a police van and tou end up in Russian jail. Your main goal - escape from the jail and the city of Brothersk.
 
-A small 2D game starter built with **Godot 4.5** and **GDScript**.
+# Gameplay
+As a main character you are trying to escape the jail. The whole game is several jail levels. To progress through the game you mainly need to defeat enemies. You can use meelee/distance weapons. Overall the gameplay is very similar to Hotline Miami.
 
-Move the blue circle with `WASD` or the arrow keys. Movement is normalized
-diagonally and the player stays within the viewport.
+# Art design
+Pixel art. Soviet style.
 
-## Requirements
+# Tech stack
+GDScript, Godot 4.5
 
-- Godot 4.5 (standard edition)
+# Git workflow
+Create a branch for each feature. Whenever you work on a specific feature you must make sure that no one else is working on it; or if you are working on a feature collaberatively, make sure that you communicate clearly with your teammate and separate concerns within the feature.
 
-## First-time setup
-
-1. Clone or download this repository.
-2. Import `project.godot` in Godot.
-3. Open the project and press **F5** to run.
-
-No native compiler, build step, or submodule setup is required.
-
-## Development
-
-Edit `scripts/player.gd` in Godot's script editor. Select the Player node in
-`scenes/main.tscn` to adjust its exported `speed` property in the Inspector.
-Movement actions are configured under **Project > Project Settings > Input Map**.
-
-## Layout
-
-- `scripts/` — GDScript game code
-- `scenes/` — Godot scenes
-- `project.godot` — project settings and input actions
-- `docs/` — game design notes
+# Unit Tests
+Better create a unit test for each feature. You can just use AI to gen a unit test and check if it's correct.
