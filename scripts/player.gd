@@ -15,9 +15,3 @@ func _process(delta: float) -> void:
 	next_position.x = clampf(next_position.x, RADIUS, viewport_size.x - RADIUS)
 	next_position.y = clampf(next_position.y, RADIUS, viewport_size.y - RADIUS)
 	position = next_position
-
-
-func _draw() -> void:
-	draw_circle(Vector2.ZERO, RADIUS + 5.0, Color(0.12, 0.2, 0.34, 0.8))
-	draw_circle(Vector2.ZERO, RADIUS, Color(0.22, 0.66, 1.0))
-	draw_circle(Vector2(-5.0, -4.0), 3.0, Color(0.92, 0.97, 1.0))

@@ -1,16 +1,19 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://bx78evsmkaxkg"]
 
-[ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
+[ext_resource type="Script" uid="uid://cemw8vvjrosgw" path="res://scripts/player.gd" id="1_player"]
 
-[node name="Main" type="Node2D"]
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_o5qli"]
+load_path = "res://.godot/imported/Player.png-6803eab55bef976c27bd94984cab14de.ctex"
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Main" type="Node2D" unique_id=1178601059]
+
+[node name="Background" type="ColorRect" parent="." unique_id=1933508029]
 offset_right = 1152.0
 offset_bottom = 648.0
 mouse_filter = 2
 color = Color(0.035, 0.047, 0.075, 1)
 
-[node name="Title" type="Label" parent="."]
+[node name="Title" type="Label" parent="." unique_id=98573346]
 offset_left = 28.0
 offset_top = 24.0
 offset_right = 360.0
@@ -19,7 +22,7 @@ theme_override_colors/font_color = Color(0.82, 0.87, 0.96, 1)
 theme_override_font_sizes/font_size = 24
 text = "ESCAPE FROM BROTHERSK"
 
-[node name="Instructions" type="Label" parent="."]
+[node name="Instructions" type="Label" parent="." unique_id=504430978]
 offset_left = 30.0
 offset_top = 58.0
 offset_right = 360.0
@@ -28,7 +31,11 @@ theme_override_colors/font_color = Color(0.48, 0.56, 0.7, 1)
 theme_override_font_sizes/font_size = 15
 text = "Move with WASD or arrow keys"
 
-[node name="Player" type="Node2D" parent="."]
+[node name="Player" type="Node2D" parent="." unique_id=775803962]
 position = Vector2(576, 324)
 script = ExtResource("1_player")
 
+[node name="skin" type="Sprite2D" parent="Player" unique_id=427514678]
+position = Vector2(0, -1)
+scale = Vector2(0.04800569, 0.038194463)
+texture = SubResource("CompressedTexture2D_o5qli")
