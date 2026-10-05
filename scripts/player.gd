@@ -1,5 +1,5 @@
 class_name Player
-extends Node2D
+extends CharacterBody2D
 
 @export_range(0.0, 1000.0, 1.0) var speed: float = 280.0:
 	set(value):

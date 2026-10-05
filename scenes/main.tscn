@@ -3,13 +3,22 @@
 [ext_resource type="Script" uid="uid://cemw8vvjrosgw" path="res://scripts/player.gd" id="1_player"]
 [ext_resource type="Texture2D" uid="uid://bqp4k3ukpvkrn" path="res://assets/sprites/main character/Player.png" id="2_0wfyh"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_go7yb"]
+size = Vector2(37, 73)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2urpc"]
+size = Vector2(42, 48)
+
 [node name="Main" type="Node2D" unique_id=1178601059]
 
 [node name="Background" type="ColorRect" parent="." unique_id=1933508029]
-offset_right = 1152.0
-offset_bottom = 648.0
+offset_left = 1.0
+offset_top = -2.0
+offset_right = 1153.0
+offset_bottom = 646.0
 mouse_filter = 2
 color = Color(0.035, 0.047, 0.075, 1)
+metadata/_edit_lock_ = true
 
 [node name="Title" type="Label" parent="." unique_id=98573346]
 offset_left = 28.0
@@ -29,11 +38,26 @@ theme_override_colors/font_color = Color(0.48, 0.56, 0.7, 1)
 theme_override_font_sizes/font_size = 15
 text = "Move with WASD or arrow keys"
 
-[node name="Player" type="Node2D" parent="." unique_id=775803962]
+[node name="Player" type="CharacterBody2D" parent="." unique_id=944918534]
 position = Vector2(576, 324)
+safe_margin = 0.001
 script = ExtResource("1_player")
 
 [node name="skin" type="Sprite2D" parent="Player" unique_id=427514678]
 position = Vector2(0, -1)
 scale = Vector2(0.04800569, 0.038194463)
 texture = ExtResource("2_0wfyh")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player" unique_id=934395980]
+position = Vector2(-0.5, -0.5)
+shape = SubResource("RectangleShape2D_go7yb")
+
+[node name="Node2D" type="Node2D" parent="." unique_id=140466316]
+position = Vector2(663, 318)
+
+[node name="CharacterBody2D" type="CharacterBody2D" parent="Node2D" unique_id=1032443518]
+position = Vector2(10, -1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Node2D/CharacterBody2D" unique_id=907117504]
+position = Vector2(-2, 3)
+shape = SubResource("RectangleShape2D_2urpc")
