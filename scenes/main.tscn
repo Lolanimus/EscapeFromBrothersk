@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cemw8vvjrosgw" path="res://scripts/player.gd" id="1_player"]
 [ext_resource type="Texture2D" uid="uid://bqp4k3ukpvkrn" path="res://assets/sprites/main character/Player.png" id="2_0wfyh"]
 [ext_resource type="Script" uid="uid://b32oapm3pxhbs" path="res://scripts/enemy.gd" id="3_enemy"]
+[ext_resource type="Script" path="res://scripts/player_camera.gd" id="4_camera"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_go7yb"]
 size = Vector2(37, 73)
@@ -42,6 +43,7 @@ text = "Move with WASD or arrow keys"
 [node name="Player" type="CharacterBody2D" parent="." unique_id=944918534]
 position = Vector2(576, 324)
 safe_margin = 0.001
+collision_layer = 2
 script = ExtResource("1_player")
 
 [node name="skin" type="Sprite2D" parent="Player" unique_id=427514678]
@@ -54,12 +56,14 @@ position = Vector2(-0.5, -0.5)
 shape = SubResource("RectangleShape2D_go7yb")
 
 [node name="Camera2D" type="Camera2D" parent="Player" unique_id=1666563782]
+script = ExtResource("4_camera")
 
 [node name="Enemies" type="Node2D" parent="." unique_id=140466316]
 position = Vector2(663, 318)
 
 [node name="Enemy1" type="CharacterBody2D" parent="Enemies" unique_id=1032443518]
 position = Vector2(10, -1)
+collision_layer = 2
 script = ExtResource("3_enemy")
 stop_distance = 40.0
 
