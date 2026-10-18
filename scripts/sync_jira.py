@@ -111,6 +111,7 @@ def jira_document(text: str) -> dict[str, Any]:
 def story_description(story: Story) -> str:
     return (
         f"Source: {story.source_path}\n"
+        f"Repository title: {story.number}: {story.title}\n"
         f"Source story: {story.source_story}\n"
         f"Blocked by: {story.blocked_by}\n\n"
         f"{story.description}"
@@ -302,7 +303,7 @@ def synchronize(client: JiraClient, intent_root: Path, repository_root: Path) ->
     for story in stories:
         story_issue = client.upsert_issue(
             label=story.sync_label,
-            summary=f"{story.number}: {story.title}",
+            summary=story.description,
             description=story_description(story),
             issue_type=story_type,
             parent_key=epic["key"],

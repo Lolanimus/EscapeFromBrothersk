@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.sync_jira import jira_document, load_stories, parse_story
+from scripts.sync_jira import jira_document, load_stories, parse_story, story_description
 
 
 SAMPLE_STORY = """# 07: Collect magazines
@@ -32,11 +32,13 @@ class StoryParserTests(unittest.TestCase):
         self.assertEqual("07", story.number)
         self.assertEqual("Collect magazines", story.title)
         self.assertEqual("done", story.status)
+        self.assertTrue(story.description.startswith("As a player, I want"))
         self.assertEqual("07-collect-magazines.md", story.source_path)
         self.assertEqual(2, len(story.criteria))
         self.assertTrue(story.criteria[0].done)
         self.assertFalse(story.criteria[1].done)
         self.assertEqual("repo-sync-demo-level-story-07", story.sync_label)
+        self.assertIn("Repository title: 07: Collect magazines", story_description(story))
 
     def test_rejects_duplicate_story_numbers(self):
         with tempfile.TemporaryDirectory() as directory:
