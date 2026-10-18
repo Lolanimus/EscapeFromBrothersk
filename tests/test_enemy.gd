@@ -1,6 +1,7 @@
 extends SceneTree
 
 const EnemyScript := preload("res://scripts/enemy.gd")
+const GameplayScene := preload("res://scenes/main.tscn")
 
 var _failures := 0
 
@@ -14,6 +15,10 @@ func _run_tests() -> void:
 	await _test_target_is_resolved_when_enemy_becomes_ready()
 	await _test_sight_range_and_obstacles_control_visibility()
 	await _test_enemy_is_clamped_inside_the_viewport()
+	await _test_enemy_keeps_pursuing_the_current_target_after_losing_sight()
+	await _test_alerted_enemy_takes_the_shortest_doorway_route_to_the_player()
+	await _test_alerted_enemy_crosses_a_doorway_without_getting_stuck()
+	await _test_alerted_enemy_routes_around_a_wall_between_two_doorways()
 
 	if _failures == 0:
 		print("PASS: all enemy tests passed")
@@ -106,6 +111,148 @@ func _test_enemy_is_clamped_inside_the_viewport() -> void:
 		"the collision shape stays inside the bottom-right viewport edge")
 
 	enemy.queue_free()
+	await process_frame
+
+
+func _test_enemy_keeps_pursuing_the_current_target_after_losing_sight() -> void:
+	var target := CharacterBody2D.new()
+	target.name = "PersistentTarget"
+	target.position = Vector2(150.0, 100.0)
+	root.add_child(target)
+
+	var enemy := _create_enemy()
+	enemy.target_path = NodePath("../PersistentTarget")
+	enemy.position = Vector2(100.0, 100.0)
+	enemy.sight_range = 100.0
+	enemy.stop_distance = 0.0
+	enemy.speed = 120.0
+	enemy.set_physics_process(true)
+	root.add_child(enemy)
+	await physics_frame
+	await physics_frame
+
+	target.position = Vector2(400.0, 100.0)
+	var obstacle := StaticBody2D.new()
+	obstacle.position = Vector2(130.0, 100.0)
+	var obstacle_collision := CollisionShape2D.new()
+	var obstacle_shape := RectangleShape2D.new()
+	obstacle_shape.size = Vector2(10.0, 80.0)
+	obstacle_collision.shape = obstacle_shape
+	obstacle.add_child(obstacle_collision)
+	root.add_child(obstacle)
+	await physics_frame
+	var position_after_losing_sight := enemy.position.x
+	for frame in range(5):
+		await physics_frame
+
+	_expect(
+		enemy.get("is_alerted") == true
+		and enemy.position.x > position_after_losing_sight
+		and enemy.velocity.x > 0.0,
+		"an alerted enemy keeps pursuing the target's current position after losing sight"
+	)
+
+	enemy.queue_free()
+	target.queue_free()
+	obstacle.queue_free()
+	await process_frame
+
+
+func _test_alerted_enemy_takes_the_shortest_doorway_route_to_the_player() -> void:
+	var level := GameplayScene.instantiate()
+	root.add_child(level)
+	current_scene = level
+	await process_frame
+
+	var player := level.get_node("Player") as CharacterBody2D
+	var enemy := level.get_node("Enemies/Enemy1") as CharacterBody2D
+	player.global_position = Vector2(650.0, 300.0)
+	enemy.global_position = Vector2(600.0, 300.0)
+	enemy.sight_range = 100.0
+	enemy.stop_distance = 0.0
+	enemy.speed = 300.0
+	await physics_frame
+	await physics_frame
+
+	player.global_position = Vector2(1000.0, 850.0)
+	await physics_frame
+	await physics_frame
+	var doorway_velocity := enemy.velocity
+
+	for frame in range(240):
+		await physics_frame
+
+	_expect(
+		enemy.get("is_alerted") == true
+		and doorway_velocity.y > 0.0
+		and absf(doorway_velocity.x) < 20.0
+		and level.call("get_area_id_at", enemy.global_position) == &"exercise_yard",
+		"an alerted enemy takes the shortest doorway route and reaches the player's room"
+	)
+
+	level.queue_free()
+	await process_frame
+
+
+func _test_alerted_enemy_crosses_a_doorway_without_getting_stuck() -> void:
+	var level := GameplayScene.instantiate()
+	root.add_child(level)
+	current_scene = level
+	await process_frame
+
+	var player := level.get_node("Player") as CharacterBody2D
+	var enemy := level.get_node("Enemies/Enemy1") as CharacterBody2D
+	player.global_position = Vector2(820.0, 475.0)
+	enemy.global_position = Vector2(900.0, 475.0)
+	enemy.sight_range = 100.0
+	enemy.stop_distance = 0.0
+	enemy.speed = 160.0
+	await physics_frame
+	await physics_frame
+
+	enemy.global_position = Vector2(850.0, 475.0)
+	player.global_position = Vector2(600.0, 350.0)
+	for frame in range(120):
+		await physics_frame
+
+	_expect(
+		enemy.get("is_alerted") == true
+		and level.call("get_area_id_at", enemy.global_position) == &"cell_block",
+		"an alerted enemy crosses the doorway instead of stopping on its boundary"
+	)
+
+	level.queue_free()
+	await process_frame
+
+
+func _test_alerted_enemy_routes_around_a_wall_between_two_doorways() -> void:
+	var level := GameplayScene.instantiate()
+	root.add_child(level)
+	current_scene = level
+	await process_frame
+
+	var player := level.get_node("Player") as CharacterBody2D
+	var enemy := level.get_node("Enemies/Enemy1") as CharacterBody2D
+	player.global_position = Vector2(1090.0, 430.0)
+	enemy.global_position = Vector2(1075.0, 430.0)
+	enemy.sight_range = 100.0
+	enemy.stop_distance = 40.0
+	enemy.speed = 160.0
+	await physics_frame
+	await physics_frame
+
+	enemy.global_position = Vector2(1075.0, 400.0)
+	player.global_position = Vector2(1500.0, 400.0)
+	for frame in range(240):
+		await physics_frame
+
+	_expect(
+		enemy.get("is_alerted") == true
+		and enemy.global_position.distance_to(player.global_position) <= enemy.stop_distance + 5.0,
+		"an alerted enemy routes around the wall between two doorway positions"
+	)
+
+	level.queue_free()
 	await process_frame
 
 

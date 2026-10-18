@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://bqp4k3ukpvkrn" path="res://assets/sprites/main character/Player.png" id="2_0wfyh"]
 [ext_resource type="Script" uid="uid://b32oapm3pxhbs" path="res://scripts/enemy.gd" id="3_enemy"]
 [ext_resource type="Script" path="res://scripts/player_camera.gd" id="4_camera"]
+[ext_resource type="Script" path="res://scripts/prison_level.gd" id="5_level"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_go7yb"]
 size = Vector2(37, 73)
@@ -12,12 +13,12 @@ size = Vector2(37, 73)
 size = Vector2(42, 48)
 
 [node name="Main" type="Node2D" unique_id=1178601059]
+script = ExtResource("5_level")
 
 [node name="Background" type="ColorRect" parent="." unique_id=1933508029]
-offset_left = 1.0
-offset_top = -2.0
-offset_right = 1153.0
-offset_bottom = 646.0
+z_index = -20
+offset_right = 1660.0
+offset_bottom = 1110.0
 mouse_filter = 2
 color = Color(0.035, 0.047, 0.075, 1)
 metadata/_edit_lock_ = true
@@ -54,6 +55,16 @@ texture = ExtResource("2_0wfyh")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Player" unique_id=934395980]
 position = Vector2(-0.5, -0.5)
 shape = SubResource("RectangleShape2D_go7yb")
+
+[node name="AimPivot" type="Node2D" parent="Player"]
+
+[node name="UpperFist" type="Polygon2D" parent="Player/AimPivot"]
+polygon = PackedVector2Array(14, -10, 27, -10, 27, -3, 14, -3)
+color = Color(0.91, 0.74, 0.48, 1)
+
+[node name="LowerFist" type="Polygon2D" parent="Player/AimPivot"]
+polygon = PackedVector2Array(14, 3, 27, 3, 27, 10, 14, 10)
+color = Color(0.91, 0.74, 0.48, 1)
 
 [node name="Camera2D" type="Camera2D" parent="Player" unique_id=1666563782]
 script = ExtResource("4_camera")

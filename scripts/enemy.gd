@@ -1,6 +1,10 @@
 class_name Enemy
 extends BoundedCharacter
 
+signal alerted
+
+const WAYPOINT_REACHED_DISTANCE := 5.0
+
 # whenever the variable is @export_range, 
 # you can access it from inside the Godot editor, and change it there.
 @export_range(0.0, 1000.0, 1.0) var speed: float = 160.0:
@@ -21,17 +25,44 @@ extends BoundedCharacter
 # it gets initialized shen the node becomes ready
 @onready var target: CharacterBody2D = get_node_or_null(target_path) as CharacterBody2D
 
+var is_alerted: bool = false
+
 
 func _physics_process(_delta: float) -> void:
 	velocity = Vector2.ZERO
 
-	if target != null and _can_see_target():
+	if target != null and not is_alerted and _can_see_target():
+		is_alerted = true
+		alerted.emit()
+
+	if target != null and is_alerted:
 		var distance_to_target := global_position.distance_to(target.global_position)
 		if distance_to_target > stop_distance:
-			velocity = global_position.direction_to(target.global_position) * speed
+			var pursuit_position := _get_next_pursuit_position()
+			velocity = global_position.direction_to(pursuit_position) * speed
 
 	move_and_slide()
-	_clamp_to_viewport()
+
+
+func _get_next_pursuit_position() -> Vector2:
+	var navigation_host := get_parent()
+	while navigation_host != null and not navigation_host.has_method("get_navigation_path"):
+		navigation_host = navigation_host.get_parent()
+
+	if navigation_host == null:
+		return target.global_position
+
+	var path: PackedVector2Array = navigation_host.call(
+		"get_navigation_path",
+		global_position,
+		target.global_position
+	)
+	for point_index in range(1, path.size()):
+		var waypoint := path[point_index]
+		if global_position.distance_to(waypoint) > WAYPOINT_REACHED_DISTANCE:
+			return waypoint
+
+	return target.global_position
 
 func _can_see_target() -> bool:
 	if global_position.distance_squared_to(target.global_position) > sight_range * sight_range:
