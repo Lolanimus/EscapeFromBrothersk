@@ -1,0 +1,42 @@
+name: Sync demo plan to Jira
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "intent/demo-level/**"
+      - "scripts/sync_jira.py"
+      - "tests/test_sync_jira.py"
+      - ".github/workflows/sync-jira.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-demo-level-to-jira
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+      JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+      JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+      JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Test synchronizer
+        run: python3 -m unittest tests/test_sync_jira.py
+
+      - name: Validate plan files
+        run: python3 scripts/sync_jira.py --validate
+
+      - name: Synchronize Jira
+        run: python3 scripts/sync_jira.py
