@@ -15,5 +15,5 @@ GDScript, Godot 4.7
 * After you're done with the feature, push to github, and create a pull request to merge with main. 
 * Whenever you work on a specific feature you must make sure that no one else is working on it; or if you are working on a feature collaberatively, make sure that you communicate clearly with your teammate and separate concerns within the feature. 
 
-# Unit Tests
-Better create a unit test for each feature. You can just use AI to gen a unit test and check if it's correct.
+# User Story workflow
+Open the ai agent from the root project folder and ask it how to implement a user story. it will reference a doc that I made that explains exactly that
