@@ -5,12 +5,16 @@
 [ext_resource type="Script" uid="uid://b32oapm3pxhbs" path="res://scripts/enemy.gd" id="3_enemy"]
 [ext_resource type="Script" path="res://scripts/player_camera.gd" id="4_camera"]
 [ext_resource type="Script" path="res://scripts/prison_level.gd" id="5_level"]
+[ext_resource type="Script" path="res://scripts/weapon_pickup.gd" id="6_pickup"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_go7yb"]
 size = Vector2(37, 73)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_2urpc"]
 size = Vector2(42, 48)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pistol"]
+radius = 14.0
 
 [node name="Main" type="Node2D" unique_id=1178601059]
 script = ExtResource("5_level")
@@ -66,13 +70,33 @@ color = Color(0.91, 0.74, 0.48, 1)
 polygon = PackedVector2Array(14, 3, 27, 3, 27, 10, 14, 10)
 color = Color(0.91, 0.74, 0.48, 1)
 
+[node name="Pistol" type="Polygon2D" parent="Player/AimPivot"]
+visible = false
+polygon = PackedVector2Array(12, -5, 34, -5, 34, 2, 25, 2, 25, 13, 18, 13, 18, 2, 12, 2)
+color = Color(0.75, 0.78, 0.84, 1)
+
 [node name="Camera2D" type="Camera2D" parent="Player" unique_id=1666563782]
 script = ExtResource("4_camera")
+
+[node name="Pickups" type="Node2D" parent="."]
+
+[node name="Pistol" type="Area2D" parent="Pickups" groups=["weapon_pickups"]]
+position = Vector2(290, 225)
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("6_pickup")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Pickups/Pistol"]
+shape = SubResource("CircleShape2D_pistol")
+
+[node name="Visual" type="Polygon2D" parent="Pickups/Pistol"]
+polygon = PackedVector2Array(-14, -4, 10, -4, 10, 2, 3, 2, 3, 11, -4, 11, -4, 2, -14, 2)
+color = Color(0.75, 0.78, 0.84, 1)
 
 [node name="Enemies" type="Node2D" parent="." unique_id=140466316]
 position = Vector2(663, 318)
 
-[node name="Enemy1" type="CharacterBody2D" parent="Enemies" unique_id=1032443518]
+[node name="Enemy1" type="CharacterBody2D" parent="Enemies" groups=["police"] unique_id=1032443518]
 position = Vector2(10, -1)
 collision_layer = 2
 script = ExtResource("3_enemy")
