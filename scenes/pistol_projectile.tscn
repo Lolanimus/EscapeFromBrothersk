@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/pistol_projectile.gd" id="1_projectile"]
+[ext_resource type="Texture2D" path="res://assets/sprites/bullets/bullet.png" id="2_bullet"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_projectile"]
+size = Vector2(12, 4)
+
+[node name="PistolProjectile" type="Area2D" groups=["player_projectiles"]]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_projectile")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_projectile")
+
+[node name="Visual" type="Sprite2D" parent="."]
+texture_filter = 1
+scale = Vector2(0.007, 0.007)
+texture = ExtResource("2_bullet")

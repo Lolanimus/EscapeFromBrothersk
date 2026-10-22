@@ -26,9 +26,14 @@ const WAYPOINT_REACHED_DISTANCE := 5.0
 @onready var target: CharacterBody2D = get_node_or_null(target_path) as CharacterBody2D
 
 var is_alerted: bool = false
+var life_state: StringName = &"living"
 
 
 func _physics_process(_delta: float) -> void:
+	if life_state == &"dead":
+		velocity = Vector2.ZERO
+		return
+
 	velocity = Vector2.ZERO
 
 	if target != null and not is_alerted and _can_see_target():
@@ -42,6 +47,19 @@ func _physics_process(_delta: float) -> void:
 			velocity = global_position.direction_to(pursuit_position) * speed
 
 	move_and_slide()
+
+
+func take_player_projectile_hit() -> void:
+	if life_state != &"living" and life_state != &"knocked_down":
+		return
+
+	life_state = &"dead"
+	is_alerted = false
+	velocity = Vector2.ZERO
+	collision_layer = 0
+	collision_mask = 0
+	modulate = Color(0.35, 0.35, 0.35, 1.0)
+	set_physics_process(false)
 
 
 func _get_next_pursuit_position() -> Vector2:
