@@ -47,16 +47,15 @@ func _test_player_can_pick_up_the_pistol() -> void:
 	Input.action_release("interact")
 	await process_frame
 
-	var equipped_pistol := player.get_node_or_null("AimPivot/Pistol") as CanvasItem
-	var upper_fist := player.get_node("AimPivot/UpperFist") as CanvasItem
-	var lower_fist := player.get_node("AimPivot/LowerFist") as CanvasItem
+	var skin := player.get_node("skin") as AnimatedSprite2D
+	var equipped_texture := skin.sprite_frames.get_frame_texture(skin.animation, skin.frame)
 	_expect(
 		player.get("active_weapon") == &"pistol"
 		and not is_instance_valid(pistol_pickup)
-		and equipped_pistol != null
-		and equipped_pistol.visible
-		and not upper_fist.visible
-		and not lower_fist.visible,
+		and skin.animation == &"idle_pistol_side"
+		and equipped_texture != null
+		and equipped_texture.resource_path
+		== "res://assets/sprites/main character/attack/pistol2.png",
 		"pressing E beside the pistol visibly equips it and removes it from the floor"
 	)
 
@@ -72,6 +71,7 @@ func _test_left_click_fires_one_projectile_toward_the_cursor() -> void:
 
 	var player := level.get_node("Player") as CharacterBody2D
 	var pistol_pickup := level.get_node("Pickups/Pistol") as Node2D
+	player.set("pistol_projectile_speed", 0.0)
 	player.global_position = pistol_pickup.global_position
 	await physics_frame
 	Input.action_press("interact")
@@ -87,6 +87,7 @@ func _test_left_click_fires_one_projectile_toward_the_cursor() -> void:
 	Input.parse_input_event(mouse_motion)
 	await process_frame
 	var aim_pivot := player.get_node("AimPivot") as Node2D
+	var muzzle := player.get_node_or_null("Muzzle") as Marker2D
 
 	var click := InputEventMouseButton.new()
 	click.button_index = MOUSE_BUTTON_LEFT
@@ -111,20 +112,36 @@ func _test_left_click_fires_one_projectile_toward_the_cursor() -> void:
 	var travel_direction := Vector2.ZERO
 	var projectile_position := Vector2.ZERO
 	var projectile_direction := Vector2.ZERO
+	var projectile_rotation := 0.0
+	var spawned_from_barrel := false
 	if projectiles.size() == 1:
 		var projectile := projectiles[0] as Node2D
 		projectile_position = projectile.global_position
 		projectile_direction = projectile.get("direction") as Vector2
+		projectile_rotation = projectile.global_rotation
 		travel_direction = player.global_position.direction_to(projectile.global_position)
-		fired_toward_cursor = travel_direction.dot(aimed_direction) > 0.99
+		fired_toward_cursor = projectile_direction.dot(aimed_direction) > 0.99
+		var expected_barrel_position := player.global_position + Vector2(21.0, -13.0)
+		spawned_from_barrel = (
+			muzzle != null
+			and projectile.global_position.distance_to(muzzle.global_position) < 0.1
+			and projectile.global_position.distance_to(expected_barrel_position) < 0.1
+		)
+	var bullet_faces_travel_direction := (
+		absf(angle_difference(projectile_rotation, projectile_direction.angle())) < 0.001
+	)
 	_expect(
-		projectiles.size() == 1 and fired_toward_cursor,
-		"left click fires one pistol projectile toward the cursor "
-		+ "(projectiles: %d, player: %s, projectile: %s, stored direction: %s, aim: %s, travel: %s, moved correctly: %s)" % [
+		projectiles.size() == 1
+		and fired_toward_cursor
+		and bullet_faces_travel_direction
+		and spawned_from_barrel,
+		"left click fires one pistol projectile from the barrel facing toward the cursor "
+		+ "(projectiles: %d, player: %s, projectile: %s, stored direction: %s, rotation: %.3f, aim: %s, travel: %s, moved correctly: %s)" % [
 			projectiles.size(),
 			player.global_position,
 			projectile_position,
 			projectile_direction,
+			projectile_rotation,
 			aimed_direction,
 			travel_direction,
 			fired_toward_cursor,

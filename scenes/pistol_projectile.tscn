@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/pistol_projectile.gd" id="1_projectile"]
+[ext_resource type="Texture2D" path="res://assets/sprites/bullets/bullet.png" id="2_bullet"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_projectile"]
 size = Vector2(12, 4)
@@ -13,6 +14,7 @@ script = ExtResource("1_projectile")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_projectile")
 
-[node name="Visual" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(-6, -2, 6, -2, 6, 2, -6, 2)
-color = Color(1, 0.9, 0.35, 1)
+[node name="Visual" type="Sprite2D" parent="."]
+texture_filter = 1
+scale = Vector2(0.007, 0.007)
+texture = ExtResource("2_bullet")

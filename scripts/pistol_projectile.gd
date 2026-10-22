@@ -1,7 +1,10 @@
 class_name PistolProjectile
 extends Area2D
 
-var direction := Vector2.RIGHT
+var direction := Vector2.RIGHT:
+	set(value):
+		direction = value.normalized() if not value.is_zero_approx() else Vector2.RIGHT
+		rotation = direction.angle()
 var speed := 1200.0
 
 
