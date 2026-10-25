@@ -1,6 +1,19 @@
 extends SceneTree
 
 const GameplayScene := preload("res://scenes/main.tscn")
+const PRISON_DOOR_ROUTES: Array[Dictionary] = [
+	{"door": Vector2(350.0, 225.0), "start": Vector2(250.0, 225.0), "action": &"move_right", "destination": &"cell_block"},
+	{"door": Vector2(850.0, 225.0), "start": Vector2(750.0, 225.0), "action": &"move_right", "destination": &"guard_office"},
+	{"door": Vector2(1250.0, 225.0), "start": Vector2(1150.0, 225.0), "action": &"move_right", "destination": &"storage"},
+	{"door": Vector2(1075.0, 400.0), "start": Vector2(1075.0, 300.0), "action": &"move_down", "destination": &"central_corridor"},
+	{"door": Vector2(1500.0, 400.0), "start": Vector2(1500.0, 300.0), "action": &"move_down", "destination": &"central_corridor"},
+	{"door": Vector2(850.0, 475.0), "start": Vector2(750.0, 475.0), "action": &"move_right", "destination": &"central_corridor"},
+	{"door": Vector2(600.0, 600.0), "start": Vector2(600.0, 500.0), "action": &"move_down", "destination": &"alternate_passage"},
+	{"door": Vector2(850.0, 725.0), "start": Vector2(750.0, 725.0), "action": &"move_right", "destination": &"exercise_yard"},
+	{"door": Vector2(1100.0, 600.0), "start": Vector2(1100.0, 500.0), "action": &"move_down", "destination": &"exercise_yard"},
+	{"door": Vector2(1560.0, 600.0), "start": Vector2(1560.0, 500.0), "action": &"move_down", "destination": &"exit"},
+	{"door": Vector2(1450.0, 850.0), "start": Vector2(1350.0, 850.0), "action": &"move_right", "destination": &"exit"},
+]
 
 var _failures := 0
 
@@ -26,6 +39,10 @@ func _run_tests() -> void:
 	await _test_player_can_reach_the_exit_from_the_exercise_yard()
 	await _test_player_can_use_the_alternate_side_passage_to_the_yard()
 	await _test_prison_contains_exactly_the_seven_selected_rooms()
+	await _test_player_can_traverse_every_prison_door()
+	await _test_policeman_approaching_a_door_opens_it_permanently()
+	await _test_closed_door_blocks_movement_until_opened()
+	await _test_closed_door_blocks_sight_and_open_door_allows_it()
 
 	if _failures == 0:
 		print("PASS: all demo-level navigation tests passed")
@@ -475,6 +492,195 @@ func _test_prison_contains_exactly_the_seven_selected_rooms() -> void:
 	_expect(
 		contains_exact_rooms,
 		"the prison contains exactly the seven selected rooms"
+	)
+
+	level.queue_free()
+	await process_frame
+
+
+func _test_player_can_traverse_every_prison_door() -> void:
+	var level := GameplayScene.instantiate()
+	root.add_child(level)
+	current_scene = level
+	await process_frame
+
+	var doors := get_nodes_in_group("automatic_doors")
+	var doors_by_position: Dictionary = {}
+	for candidate: Node in doors:
+		var door_node := candidate as Node2D
+		if door_node != null:
+			doors_by_position[door_node.global_position] = candidate
+	var player := level.get_node("Player") as CharacterBody2D
+	var policeman := level.get_node("Enemies/Enemy1") as Enemy
+	policeman.speed = 0.0
+	policeman.sight_range = 0.0
+	var successful_routes := 0
+
+	for route: Dictionary in PRISON_DOOR_ROUTES:
+		var door_position: Vector2 = route["door"]
+		var door := doors_by_position.get(door_position) as Node
+		if door == null:
+			continue
+		player.global_position = route["start"]
+		for frame in range(2):
+			await physics_frame
+		var action: StringName = route["action"]
+		Input.action_press(action)
+		for frame in range(60):
+			await physics_frame
+		Input.action_release(action)
+		var reached_destination: bool = (
+			level.call("get_area_id_at", player.global_position) == route["destination"]
+		)
+		var opened_by_player := bool(door.get("is_open"))
+		player.global_position = Vector2(200.0, 225.0)
+		for frame in range(3):
+			await physics_frame
+		var remained_open_after_player_left := bool(door.get("is_open"))
+		if reached_destination and opened_by_player and remained_open_after_player_left:
+			successful_routes += 1
+
+	_expect(
+		doors.size() == PRISON_DOOR_ROUTES.size()
+		and successful_routes == PRISON_DOOR_ROUTES.size(),
+		"the player opens and traverses all 11 prison door routes, and each door stays open"
+	)
+
+	level.queue_free()
+	await process_frame
+
+
+func _test_policeman_approaching_a_door_opens_it_permanently() -> void:
+	var level := GameplayScene.instantiate()
+	root.add_child(level)
+	current_scene = level
+	await process_frame
+
+	var doors := get_nodes_in_group("automatic_doors")
+	var doors_by_position: Dictionary = {}
+	for candidate: Node in doors:
+		var door_node := candidate as Node2D
+		if door_node != null:
+			doors_by_position[door_node.global_position] = candidate
+	var player := level.get_node("Player") as CharacterBody2D
+	var policeman := level.get_node("Enemies/Enemy1") as Enemy
+	player.global_position = Vector2(200.0, 225.0)
+	policeman.speed = 0.0
+	policeman.sight_range = 0.0
+	var activated_doors := 0
+	for route: Dictionary in PRISON_DOOR_ROUTES:
+		var door_position: Vector2 = route["door"]
+		var door := doors_by_position.get(door_position) as Node
+		if door == null:
+			continue
+		var approach_direction: Vector2 = (
+			door_position - (route["start"] as Vector2)
+		).normalized()
+		policeman.global_position = door_position - approach_direction * 50.0
+		for frame in range(4):
+			await physics_frame
+		var opened_by_policeman := bool(door.get("is_open"))
+		policeman.global_position = Vector2(200.0, 225.0)
+		for frame in range(3):
+			await physics_frame
+		if opened_by_policeman and bool(door.get("is_open")):
+			activated_doors += 1
+
+	_expect(
+		doors.size() == PRISON_DOOR_ROUTES.size()
+		and activated_doors == PRISON_DOOR_ROUTES.size(),
+		"a policeman activates every prison door and each stays open after he leaves"
+	)
+
+	level.queue_free()
+	await process_frame
+
+
+func _test_closed_door_blocks_movement_until_opened() -> void:
+	var level := GameplayScene.instantiate()
+	root.add_child(level)
+	current_scene = level
+	await process_frame
+
+	var probe := CharacterBody2D.new()
+	probe.collision_layer = 2
+	probe.collision_mask = 9
+	var probe_collision := CollisionShape2D.new()
+	var probe_rectangle := RectangleShape2D.new()
+	probe_rectangle.size = Vector2(20.0, 20.0)
+	probe_collision.shape = probe_rectangle
+	probe.add_child(probe_collision)
+	level.add_child(probe)
+	probe.global_position = Vector2(300.0, 225.0)
+	await physics_frame
+
+	for frame in range(30):
+		probe.velocity = Vector2(200.0, 0.0)
+		probe.move_and_slide()
+		await physics_frame
+	var position_while_door_is_closed := probe.global_position.x
+
+	var player := level.get_node("Player") as CharacterBody2D
+	player.global_position = Vector2(290.0, 225.0)
+	for frame in range(3):
+		await physics_frame
+	probe.global_position = Vector2(300.0, 225.0)
+	for frame in range(30):
+		probe.velocity = Vector2(200.0, 0.0)
+		probe.move_and_slide()
+		await physics_frame
+
+	_expect(
+		position_while_door_is_closed < 340.0
+		and probe.global_position.x > 400.0,
+		"a closed door stops movement, then an opened door lets the character pass"
+	)
+
+	level.queue_free()
+	await process_frame
+
+
+func _test_closed_door_blocks_sight_and_open_door_allows_it() -> void:
+	var level := GameplayScene.instantiate()
+	root.add_child(level)
+	current_scene = level
+	await process_frame
+
+	var player := level.get_node("Player") as CharacterBody2D
+	var policeman := level.get_node("Enemies/Enemy1") as Enemy
+	player.global_position = Vector2(250.0, 225.0)
+	policeman.global_position = Vector2(450.0, 225.0)
+	policeman.speed = 0.0
+	policeman.sight_range = 300.0
+	for frame in range(3):
+		await physics_frame
+	var closed_door_blocks_sight := not policeman.is_alerted
+	level.queue_free()
+	await process_frame
+
+	level = GameplayScene.instantiate()
+	root.add_child(level)
+	current_scene = level
+	await process_frame
+	player = level.get_node("Player") as CharacterBody2D
+	policeman = level.get_node("Enemies/Enemy1") as Enemy
+	policeman.speed = 0.0
+	player.global_position = Vector2(250.0, 225.0)
+	Input.action_press("move_right")
+	for frame in range(15):
+		await physics_frame
+	Input.action_release("move_right")
+	player.global_position = Vector2(250.0, 225.0)
+	policeman.global_position = Vector2(1100.0, 1000.0)
+	for frame in range(3):
+		await physics_frame
+	policeman.global_position = Vector2(450.0, 225.0)
+	for frame in range(3):
+		await physics_frame
+
+	_expect(
+		closed_door_blocks_sight and policeman.is_alerted,
+		"a closed door blocks police sight and the same doorway allows sight after opening"
 	)
 
 	level.queue_free()
