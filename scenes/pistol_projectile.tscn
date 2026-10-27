@@ -8,7 +8,7 @@ size = Vector2(12, 4)
 
 [node name="PistolProjectile" type="Area2D" groups=["player_projectiles"]]
 collision_layer = 4
-collision_mask = 3
+collision_mask = 11
 script = ExtResource("1_projectile")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
