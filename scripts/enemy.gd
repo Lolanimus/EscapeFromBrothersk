@@ -7,7 +7,7 @@ const WAYPOINT_REACHED_DISTANCE := 5.0
 
 # whenever the variable is @export_range, 
 # you can access it from inside the Godot editor, and change it there.
-@export_range(0.0, 1000.0, 1.0) var speed: float = 160.0:
+@export_range(0.0, 1000.0, 1.0) var speed: float = 40.0:
 	set(value):
 		speed = maxf(value, 0.0)
 
@@ -18,15 +18,24 @@ const WAYPOINT_REACHED_DISTANCE := 5.0
 @export_range(0.0, 200.0, 1.0) var stop_distance: float = 35.0:
 	set(value):
 		stop_distance = maxf(value, 0.0)
+		
+@export_range(1.0, 180.0, 1.0) var vision_angle: float = 90.0
 
 @export_node_path("CharacterBody2D") var target_path: NodePath = ^"../../Player"
 
+@onready var vision: Node2D = get_node_or_null("Vision")
 # whenever the variable is @onready,
 # it gets initialized shen the node becomes ready
 @onready var target: CharacterBody2D = get_node_or_null(target_path) as CharacterBody2D
+func _ready() -> void:
+	print("Enemy target: ", target)
 
 var is_alerted: bool = false
 var life_state: StringName = &"living"
+
+
+
+
 
 
 func _physics_process(_delta: float) -> void:
@@ -34,19 +43,34 @@ func _physics_process(_delta: float) -> void:
 		velocity = Vector2.ZERO
 		return
 
+	# 1. MOVEMENT: keep chasing the player
 	velocity = Vector2.ZERO
 
-	if target != null and not is_alerted and _can_see_target():
-		is_alerted = true
-		alerted.emit()
+	if target != null:
+		var distance := global_position.distance_to(
+			target.global_position
+		)
 
-	if target != null and is_alerted:
-		var distance_to_target := global_position.distance_to(target.global_position)
-		if distance_to_target > stop_distance:
-			var pursuit_position := _get_next_pursuit_position()
-			velocity = global_position.direction_to(pursuit_position) * speed
+		if distance > stop_distance:
+			var direction := global_position.direction_to(
+				target.global_position
+			)
+			velocity = direction * speed
+
+	# 2. DETECTION: cone turns red only if player is visible
+	var can_see := _can_see_target()
+
+	if can_see != is_alerted:
+		is_alerted = can_see
+
+		if vision != null:
+			vision.set_alerted(is_alerted)
+
+		if is_alerted:
+			alerted.emit()
 
 	move_and_slide()
+
 
 
 func take_player_projectile_hit() -> void:
@@ -82,13 +106,39 @@ func _get_next_pursuit_position() -> Vector2:
 
 	return target.global_position
 
+
 func _can_see_target() -> bool:
-	if global_position.distance_squared_to(target.global_position) > sight_range * sight_range:
+	if target == null or vision == null:
 		return false
 
-	var query := PhysicsRayQueryParameters2D.create(global_position, target.global_position)
-	query.exclude = [get_rid()]
-	query.collision_mask = collision_mask
+	# 1. Check distance using the same range as the drawn cone
+	var direction: Vector2 = target.global_position - vision.global_position
+	var distance: float = direction.length()
 
-	var result := get_world_2d().direct_space_state.intersect_ray(query)
-	return result.is_empty() or result.get("collider") == target
+	if distance > vision.vision_range:
+		return false
+
+	# 2. Check whether the player is inside the triangle
+	var forward: Vector2 = Vector2.UP.rotated(vision.global_rotation)
+	var half_angle: float = deg_to_rad(vision.vision_angle / 2.0)
+
+	if absf(forward.angle_to(direction.normalized())) > half_angle:
+		return false
+
+	# 3. Check whether a wall blocks the view
+	var query := PhysicsRayQueryParameters2D.create(
+		vision.global_position,
+		target.global_position
+	)
+
+	query.exclude = [get_rid()]
+	query.collision_mask = 4294967295
+	query.collide_with_bodies = true
+	query.collide_with_areas = false
+
+	var result: Dictionary = get_world_2d().direct_space_state.intersect_ray(query)
+
+	if result.is_empty():
+		return false
+
+	return result["collider"] == target
