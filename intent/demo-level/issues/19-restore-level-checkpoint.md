@@ -4,7 +4,7 @@
 
 **What to build:** As a player, I want death or manual restart to restore the complete level-start checkpoint quickly, so that each retry begins from a consistent state.
 
-**Blocked by:** 03: Operate automatic doors; 05: Pursue and shoot the detected player; 08: Reload from retained magazines; 11: Choke a knocked-down policeman; 12: Unlock and leave the cleared prison; 15: Drop police weapons with full magazines; 16: Guarantee a placed-ammunition surplus; 18: Throw the active weapon.
+**Blocked by:** 04: Operate automatic doors; 06: Pursue and shoot the detected player; 08: Reload from retained magazines; 11: Choke a knocked-down policeman; 12: Unlock and leave the cleared prison; 15: Drop police weapons with full magazines; 16: Guarantee a placed-ammunition surplus; 18: Throw the active weapon.
 
 **Status:** ready-for-agent
 

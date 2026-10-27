@@ -4,7 +4,7 @@
 
 **What to build:** As a player, I want the exit to unlock after every policeman is permanently dead and then continue to a configured next level, so that completing the required objective produces an explicit level transition.
 
-**Blocked by:** 02: Acquire and fire the pistol; 10: Punch and recover knocked-down police; 11: Choke a knocked-down policeman.
+**Blocked by:** 03: Acquire and fire the pistol; 10: Punch and recover knocked-down police; 11: Choke a knocked-down policeman.
 
 **Status:** ready-for-agent
 

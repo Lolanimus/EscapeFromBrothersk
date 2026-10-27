@@ -4,7 +4,7 @@
 
 **What to build:** As a player, I want movement, fist attacks, pistol attacks, pickups, and projectiles to use the artwork already available in the game, so that my actions have clear animated visual feedback without introducing unsupported or newly generated art.
 
-**Blocked by:** 02: Acquire and fire the pistol; 10: Punch and recover knocked-down police.
+**Blocked by:** 03: Acquire and fire the pistol; 10: Punch and recover knocked-down police.
 
 **Status:** ready-for-agent
 

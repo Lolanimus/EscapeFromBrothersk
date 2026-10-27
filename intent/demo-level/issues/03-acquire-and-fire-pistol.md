@@ -1,4 +1,4 @@
-# 02: Acquire and fire the pistol
+# 03: Acquire and fire the pistol
 
 **Source story:** 3
 

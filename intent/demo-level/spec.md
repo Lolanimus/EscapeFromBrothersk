@@ -34,6 +34,7 @@ The following Fibonacci estimates are provisional. No story exceeds 8 points; im
 18. As a player, I want to throw my active weapon, so that guns can knock down a policeman and a katana can kill one at range. **Estimate: 5 points.**
 19. As a player, I want death or manual restart to restore the complete level-start checkpoint quickly, so that each retry begins from a consistent state. **Estimate: 8 points.**
 20. As a player, I want clear HUD and audio feedback for my current action and state, so that I can understand weapons, ammunition, motivation, combat states, and objectives. **Estimate: 8 points.**
+21. As a player, I want movement, fist attacks, pistol attacks, pickups, and projectiles to use the artwork already available in the game, so that my actions have clear animated visual feedback without introducing unsupported or newly generated art. **Estimate: 5 points.**
 
 ## Implementation Decisions
 

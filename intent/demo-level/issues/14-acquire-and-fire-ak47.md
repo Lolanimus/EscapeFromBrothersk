@@ -4,7 +4,7 @@
 
 **What to build:** As a player, I want to acquire and fire an AK-47, so that I can use an automatic ranged weapon with its own magazine type.
 
-**Blocked by:** 05: Pursue and shoot the detected player; 08: Reload from retained magazines.
+**Blocked by:** 06: Pursue and shoot the detected player; 08: Reload from retained magazines.
 
 **Status:** ready-for-agent
 

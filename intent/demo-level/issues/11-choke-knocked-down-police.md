@@ -4,7 +4,7 @@
 
 **What to build:** As a player, I want to choke a knocked-down policeman through an interruptible hold action, so that I can permanently eliminate him without ammunition while accepting close-range risk.
 
-**Blocked by:** 06: Apply the motivation combat loop; 10: Punch and recover knocked-down police.
+**Blocked by:** 02: Apply the motivation combat loop; 10: Punch and recover knocked-down police.
 
 **Status:** ready-for-agent
 

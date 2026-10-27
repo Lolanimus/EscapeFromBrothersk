@@ -4,7 +4,7 @@
 
 **What to build:** As a player, I want to collect and retain full weapon-specific magazines, so that ammunition found for unequipped guns remains useful later.
 
-**Blocked by:** 02: Acquire and fire the pistol.
+**Blocked by:** 03: Acquire and fire the pistol.
 
 **Status:** ready-for-agent
 

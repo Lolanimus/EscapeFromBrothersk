@@ -1,4 +1,4 @@
-# 03: Operate automatic doors
+# 04: Operate automatic doors
 
 **Source story:** 4
 

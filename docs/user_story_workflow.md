@@ -66,12 +66,12 @@ You only need to point the AI to those files, ask it to use `$tdd`, and confirm 
 For example:
 
 ```text
-Use $tdd for ticket 02.
+Use $tdd for ticket 03.
 
 Read:
 - intent/demo-level/intent.md
 - intent/demo-level/spec.md
-- intent/demo-level/issues/02-acquire-and-fire-pistol.md
+- intent/demo-level/issues/03-acquire-and-fire-pistol.md
 
 Work one red-green cycle at a time and stop after each cycle.
 ```
@@ -145,7 +145,7 @@ Stop, show the result, and choose the next behavior.
 
 Do not write every test first. Complete one small behavior before starting the next one.
 
-Ticket 02 might become these cycles:
+Ticket 03 might become these cycles:
 
 1. Pressing `E` near a pistol picks it up.
 2. Left click fires toward the mouse.

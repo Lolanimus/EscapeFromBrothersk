@@ -1,10 +1,10 @@
-# 05: Pursue and shoot the detected player
+# 06: Pursue and shoot the detected player
 
 **Source story:** 6
 
 **What to build:** As a player, I want an alerted policeman to track, pursue, and shoot at me until one of us dies, so that detection creates a persistent threat.
 
-**Blocked by:** 02: Acquire and fire the pistol; 04: Show police vision and detection.
+**Blocked by:** 03: Acquire and fire the pistol; 05: Show police vision and detection.
 
 **Status:** ready-for-agent
 

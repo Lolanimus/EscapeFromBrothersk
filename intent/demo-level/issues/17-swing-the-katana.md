@@ -4,7 +4,7 @@
 
 **What to build:** As a player, I want the katana swing to kill every policeman in its unobstructed arc, so that the melee weapon can handle grouped enemies.
 
-**Blocked by:** 06: Apply the motivation combat loop; 09: Carry and switch the limited loadout.
+**Blocked by:** 02: Apply the motivation combat loop; 09: Carry and switch the limited loadout.
 
 **Status:** ready-for-agent
 

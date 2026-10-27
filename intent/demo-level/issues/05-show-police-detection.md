@@ -1,10 +1,10 @@
-# 04: Show police vision and detection
+# 05: Show police vision and detection
 
 **Source story:** 5
 
 **What to build:** As a player, I want visible police vision cones and clear detection feedback, so that I understand when an unalerted policeman can see me.
 
-**Blocked by:** 01: Navigate the prison and alternate passage; 03: Operate automatic doors.
+**Blocked by:** 01: Navigate the prison and alternate passage; 04: Operate automatic doors.
 
 **Status:** ready-for-agent
 

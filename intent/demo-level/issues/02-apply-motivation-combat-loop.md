@@ -1,10 +1,10 @@
-# 06: Apply the motivation combat loop
+# 02: Apply the motivation combat loop
 
 **Source story:** 2
 
 **What to build:** As a player, I want police attacks to reduce my motivation and permanent kills to restore it, so that survival and the elimination objective reinforce the same combat loop.
 
-**Blocked by:** 02: Acquire and fire the pistol; 05: Pursue and shoot the detected player.
+**Blocked by:** 03: Acquire and fire the pistol; 06: Pursue and shoot the detected player.
 
 **Status:** ready-for-agent
 
