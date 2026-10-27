@@ -19,8 +19,8 @@
 [ext_resource type="Texture2D" uid="uid://crbc0bwj22btm" path="res://assets/sprites/main character/attack/backsideAttack/backpistol2.png" id="17_pistol_up_2"]
 [ext_resource type="Texture2D" uid="uid://rcu23fxywhgt" path="res://assets/sprites/main character/attack/1.png" id="18_fists_side"]
 [ext_resource type="Texture2D" uid="uid://dpqvdxubvsson" path="res://assets/sprites/main character/attack/backsideAttack/backpunch1.png" id="19_fists_up"]
-[ext_resource type="Script" uid="uid://32efq7ftek6i" path="res://scenes/vision.gd" id="20_gqmmt"]
-[ext_resource type="Texture2D" uid="uid://dru3wplt7cdj1" path="res://assets/sprites/policeman/Policeman_side.png" id="21_yc10j"]
+[ext_resource type="Script" uid="uid://bkb4xi3qvdxdc" path="res://scenes/vision.gd" id="20_gqmmt"]
+[ext_resource type="Texture2D" uid="uid://ce5hxcb1ps12v" path="res://assets/sprites/policeman/Policeman_side1.png" id="21_yc10j"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_player"]
 animations = [{
@@ -220,10 +220,10 @@ shape = SubResource("RectangleShape2D_2urpc")
 debug_color = Color(0.9014307, 0, 0.21367055, 0.41960785)
 
 [node name="Vision" type="Node2D" parent="Enemies/Enemy1" unique_id=1183385143]
-position = Vector2(400, 300)
+position = Vector2(-6, 2)
 script = ExtResource("20_gqmmt")
 
 [node name="Sprite2D" type="Sprite2D" parent="Enemies/Enemy1" unique_id=1210190215]
-position = Vector2(400, 300)
+position = Vector2(-5.9999695, 3.0000305)
 scale = Vector2(0.1, 0.1)
 texture = ExtResource("21_yc10j")
