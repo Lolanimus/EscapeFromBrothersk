@@ -20,7 +20,8 @@
 [ext_resource type="Texture2D" uid="uid://rcu23fxywhgt" path="res://assets/sprites/main character/attack/1.png" id="18_fists_side"]
 [ext_resource type="Texture2D" uid="uid://dpqvdxubvsson" path="res://assets/sprites/main character/attack/backsideAttack/backpunch1.png" id="19_fists_up"]
 [ext_resource type="Script" uid="uid://bkb4xi3qvdxdc" path="res://scenes/vision.gd" id="20_gqmmt"]
-[ext_resource type="Texture2D" uid="uid://ce5hxcb1ps12v" path="res://assets/sprites/policeman/Policeman_side1.png" id="21_yc10j"]
+[ext_resource type="Texture2D" uid="uid://ce5hxcb1ps12v" path="res://assets/sprites/Policeman/Policeman_side1.png" id="21_yc10j"]
+[ext_resource type="Script" uid="uid://caqtx4k3wooul" path="res://scripts/enemy_gun.gd" id="22_jscy8"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_player"]
 animations = [{
@@ -228,17 +229,17 @@ position = Vector2(-5.9999695, 3.0000305)
 scale = Vector2(0.1, 0.1)
 texture = ExtResource("21_yc10j")
 
-[node name="Pistol" type="Area2D" parent="Enemies/Enemy1" unique_id=1323120871 groups=["weapon_pickups"]]
+[node name="Gun" type="Area2D" parent="Enemies/Enemy1" unique_id=1323120871 groups=["weapon_pickups"]]
 position = Vector2(-11, 10)
 collision_layer = 0
 collision_mask = 0
-script = ExtResource("6_pickup")
+script = ExtResource("22_jscy8")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Enemies/Enemy1/Pistol" unique_id=526449005]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Enemies/Enemy1/Gun" unique_id=526449005]
 position = Vector2(6, -1)
 shape = SubResource("CircleShape2D_pistol")
 
-[node name="Visual" type="Sprite2D" parent="Enemies/Enemy1/Pistol" unique_id=403238186]
+[node name="Visual" type="Sprite2D" parent="Enemies/Enemy1/Gun" unique_id=403238186]
 texture_filter = 1
 position = Vector2(0.99999994, 0.99999994)
 scale = Vector2(0.05, 0.05)

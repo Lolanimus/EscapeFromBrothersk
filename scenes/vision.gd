@@ -1,10 +1,10 @@
-
 extends Node2D
 
 @export_range(1.0, 180.0, 1.0) var vision_angle: float = 90.0
 @export_range(0.0, 2000.0, 1.0) var vision_range: float = 150.0
 @export var cone_color: Color = Color(1.0, 0.85, 0.0, 0.35)
 @export var alerted_color: Color = Color(1.0, 0.0, 0.0, 0.45)
+@export_range(0.0, 30.0, 0.1) var turn_speed: float = 6.0  # radians per second, 0 = snap instantly
 
 var is_alerted: bool = false
 
@@ -12,6 +12,14 @@ func set_alerted(value: bool) -> void:
 	is_alerted = value
 	queue_redraw()
 @export_flags_2d_physics var vision_collision_mask: int = 1
+
+func face_point(world_point: Vector2, delta: float) -> void:
+	# The cone points "up" (-Y), and angle() measures from +X, so add 90 degrees.
+	var target_angle := (world_point - global_position).angle() + PI / 2.0
+	if turn_speed <= 0.0:
+		global_rotation = target_angle
+	else:
+		global_rotation = rotate_toward(global_rotation, target_angle, turn_speed * delta)
 
 func _process(_delta: float) -> void:
 	queue_redraw()
@@ -31,7 +39,7 @@ func _draw() -> void:
 			float(i) / float(segments)
 		)
 
-		var direction := Vector2(sin(angle), -cos(angle))
+		var direction := Vector2(sin(angle), -cos(angle)).rotated(global_rotation)
 		var end_point: Vector2 = global_position + direction * vision_range
 
 		var query := PhysicsRayQueryParameters2D.create(
