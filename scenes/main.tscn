@@ -190,6 +190,14 @@ position = Vector2(-21, -13)
 [node name="Camera2D" type="Camera2D" parent="Player" unique_id=1666563782]
 script = ExtResource("4_camera")
 
+[node name="CanvasLayer" type="CanvasLayer" parent="Player" unique_id=92917960]
+
+[node name="StatsLabel" type="Label" parent="Player/CanvasLayer" unique_id=834611085]
+offset_left = 2.0
+offset_top = 547.0
+offset_right = 230.0
+offset_bottom = 648.0
+
 [node name="Pickups" type="Node2D" parent="." unique_id=272605550]
 
 [node name="Pistol" type="Area2D" parent="Pickups" unique_id=1674564713 groups=["weapon_pickups"]]

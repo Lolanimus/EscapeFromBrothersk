@@ -81,6 +81,9 @@ func take_player_projectile_hit() -> void:
 		gun.set_trigger(false)
 	set_physics_process(false)
 
+	if target != null and target.has_method("on_enemy_killed"):
+		target.on_enemy_killed()
+
 
 func _get_next_pursuit_position() -> Vector2:
 	var navigation_host := get_parent()

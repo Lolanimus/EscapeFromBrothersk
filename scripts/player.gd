@@ -21,9 +21,27 @@ var _pistol_animation_playing := false
 var _last_facing: StringName = &"side"
 var _last_side_faces_right := false
 
+var motivation:= 8
+var pistol_magazines = 3
+var pistol_bullet = 12
+
+const MAX_MAG = 3
+const MAX_PISTOL_BULLET = 12
+const MAX_MOTIVATION = 8
+
+
+
 @onready var aim_pivot: Node2D = $AimPivot
 @onready var muzzle: Marker2D = $Muzzle
 @onready var skin: AnimatedSprite2D = $skin
+@onready var stats_label: Label = $CanvasLayer/StatsLabel
+
+func _process(_delta: float) -> void:
+	stats_label.text = "motivation: %d/%d\nbullets: %d/%d\nMagazines: %d/%d" % [
+		motivation, MAX_MOTIVATION,
+		pistol_bullet, MAX_PISTOL_BULLET,
+		pistol_magazines, MAX_MAG,
+	]
 
 
 func _ready() -> void:
@@ -56,10 +74,15 @@ func _physics_process(delta: float) -> void:
 	if (
 		Input.is_action_just_pressed("shoot")
 		and active_weapon == &"pistol"
+		and pistol_bullet > 0
 		and is_zero_approx(_pistol_cooldown_remaining)
 	):
 		_fire_pistol()
+		pistol_bullet -= 1
 		_pistol_cooldown_remaining = pistol_firing_cadence
+	if Input.is_action_just_pressed("reload"):
+		_reload_pistol()
+
 
 	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	velocity = direction * speed
@@ -173,3 +196,26 @@ func _update_skin_frame_offset() -> void:
 	skin.position = SKIN_BASE_POSITION
 	if skin.animation == &"walk_down":
 		skin.position.y += -1.0 if skin.frame == 0 else 1.0
+
+
+# Called by enemy bullets when they hit the player.
+func take_police_projectile_hit() -> void:
+	motivation = maxi(motivation - 1, 0)
+
+
+# Called by an enemy when the player kills him.
+func on_enemy_killed() -> void:
+	motivation = mini(motivation + 1, MAX_MOTIVATION)
+
+	
+
+func _reload_pistol() -> void:
+	if active_weapon != &"pistol":
+		return
+	if pistol_magazines <= 0:
+		return  # no magazines left
+	if pistol_bullet == MAX_PISTOL_BULLET:
+		return  # already full, don't waste a magazine
+
+	pistol_magazines -= 1
+	pistol_bullet = MAX_PISTOL_BULLET
