@@ -1,6 +1,8 @@
 class_name PrisonLevel
 extends Node2D
 
+const AUTOMATIC_DOOR_SCRIPT := preload("res://scripts/automatic_door.gd")
+
 const AREA_RECTS: Dictionary = {
 	&"starting_cell": Rect2(100.0, 100.0, 250.0, 250.0),
 	&"cell_block": Rect2(350.0, 100.0, 500.0, 500.0),
@@ -87,9 +89,32 @@ func _ready() -> void:
 	_add_wall("ExitBottom", Rect2(1450.0, 1090.0, 200.0, 20.0))
 	_add_wall("AlternatePassageLeft", Rect2(340.0, 600.0, 20.0, 200.0))
 	_add_wall("AlternatePassageBottom", Rect2(350.0, 790.0, 500.0, 20.0))
+	_add_automatic_doors()
 
 	var player := get_node("Player") as CharacterBody2D
 	player.position = Vector2(225.0, 225.0)
+
+
+func _add_automatic_doors() -> void:
+	var door_locations: Array[Dictionary] = [
+		{"position": Vector2(350.0, 225.0), "rotation": 0.0},
+		{"position": Vector2(850.0, 225.0), "rotation": 0.0},
+		{"position": Vector2(1250.0, 225.0), "rotation": 0.0},
+		{"position": Vector2(1075.0, 400.0), "rotation": 90.0},
+		{"position": Vector2(1500.0, 400.0), "rotation": 90.0},
+		{"position": Vector2(850.0, 475.0), "rotation": 0.0},
+		{"position": Vector2(600.0, 600.0), "rotation": 90.0},
+		{"position": Vector2(850.0, 725.0), "rotation": 0.0},
+		{"position": Vector2(1100.0, 600.0), "rotation": 90.0},
+		{"position": Vector2(1560.0, 600.0), "rotation": 90.0},
+		{"position": Vector2(1450.0, 850.0), "rotation": 0.0},
+	]
+	for location: Dictionary in door_locations:
+		var door := Node2D.new()
+		door.set_script(AUTOMATIC_DOOR_SCRIPT)
+		door.position = location["position"]
+		door.rotation_degrees = location["rotation"]
+		_world.add_child(door)
 
 
 func get_area_id_at(global_point: Vector2) -> StringName:

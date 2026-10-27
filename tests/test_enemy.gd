@@ -202,13 +202,17 @@ func _test_alerted_enemy_crosses_a_doorway_without_getting_stuck() -> void:
 
 	var player := level.get_node("Player") as CharacterBody2D
 	var enemy := level.get_node("Enemies/Enemy1") as CharacterBody2D
-	player.global_position = Vector2(820.0, 475.0)
+	player.global_position = Vector2(770.0, 475.0)
 	enemy.global_position = Vector2(900.0, 475.0)
 	enemy.sight_range = 100.0
 	enemy.stop_distance = 0.0
 	enemy.speed = 160.0
 	await physics_frame
 	await physics_frame
+	Input.action_press("move_right")
+	for frame in range(10):
+		await physics_frame
+	Input.action_release("move_right")
 
 	enemy.global_position = Vector2(850.0, 475.0)
 	player.global_position = Vector2(600.0, 350.0)

@@ -1,6 +1,7 @@
 extends SceneTree
 
 const GameplayScene := preload("res://scenes/main.tscn")
+const ProjectileScene := preload("res://scenes/pistol_projectile.tscn")
 
 var _failures := 0
 
@@ -15,6 +16,7 @@ func _run_tests() -> void:
 	await _test_pistol_projectile_kills_a_living_policeman_in_one_hit()
 	await _test_pistol_projectile_kills_a_knocked_down_policeman_in_one_hit()
 	await _test_wall_stops_projectile_before_it_reaches_policeman()
+	await _test_closed_door_blocks_projectiles_and_open_door_allows_them()
 	await _test_pistol_projectile_speed_is_configurable_and_observable()
 	await _test_player_pistol_firing_cadence_is_configurable_and_observable()
 
@@ -324,6 +326,53 @@ func _test_wall_stops_projectile_before_it_reaches_policeman() -> void:
 		get_nodes_in_group("player_projectiles").is_empty()
 		and enemy.get("life_state") == &"living",
 		"a wall stops the projectile without penetration or ricochet"
+	)
+
+	level.queue_free()
+	await process_frame
+
+
+func _test_closed_door_blocks_projectiles_and_open_door_allows_them() -> void:
+	var level := GameplayScene.instantiate()
+	root.add_child(level)
+	current_scene = level
+	await process_frame
+
+	var door: Node2D = null
+	for candidate: Node in get_nodes_in_group("automatic_doors"):
+		var candidate_door := candidate as Node2D
+		if candidate_door != null and candidate_door.global_position == Vector2(350.0, 225.0):
+			door = candidate_door
+			break
+	var player := level.get_node("Player") as CharacterBody2D
+	player.global_position = Vector2(200.0, 225.0)
+	var blocked_projectile := ProjectileScene.instantiate() as PistolProjectile
+	blocked_projectile.global_position = Vector2(300.0, 225.0)
+	blocked_projectile.direction = Vector2.RIGHT
+	blocked_projectile.speed = 600.0
+	level.add_child(blocked_projectile)
+	for frame in range(12):
+		await physics_frame
+	var closed_door_stopped_projectile := not is_instance_valid(blocked_projectile)
+
+	player.global_position = Vector2(290.0, 225.0)
+	for frame in range(3):
+		await physics_frame
+	player.global_position = Vector2(200.0, 225.0)
+	var open_projectile := ProjectileScene.instantiate() as PistolProjectile
+	open_projectile.global_position = Vector2(300.0, 225.0)
+	open_projectile.direction = Vector2.RIGHT
+	open_projectile.speed = 600.0
+	level.add_child(open_projectile)
+	for frame in range(8):
+		await physics_frame
+	var open_door_allowed_projectile := (
+		is_instance_valid(open_projectile) and open_projectile.global_position.x > 350.0
+	)
+
+	_expect(
+		door != null and closed_door_stopped_projectile and open_door_allowed_projectile,
+		"a closed door stops projectiles and the same open doorway allows them through"
 	)
 
 	level.queue_free()

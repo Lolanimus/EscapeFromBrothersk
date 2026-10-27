@@ -166,6 +166,7 @@ text = "Move with WASD or arrow keys"
 position = Vector2(576, 324)
 safe_margin = 0.001
 collision_layer = 2
+collision_mask = 9
 script = ExtResource("1_player")
 
 [node name="skin" type="AnimatedSprite2D" parent="Player" unique_id=427514678]
@@ -209,6 +210,7 @@ position = Vector2(663, 318)
 [node name="Enemy1" type="CharacterBody2D" parent="Enemies" groups=["police"] unique_id=1032443518]
 position = Vector2(10, -1)
 collision_layer = 2
+collision_mask = 9
 script = ExtResource("3_enemy")
 stop_distance = 40.0
 
