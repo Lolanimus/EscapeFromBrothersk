@@ -106,7 +106,7 @@ func _add_automatic_doors() -> void:
 		{"position": Vector2(600.0, 600.0), "rotation": 90.0},
 		{"position": Vector2(850.0, 725.0), "rotation": 0.0},
 		{"position": Vector2(1100.0, 600.0), "rotation": 90.0},
-		{"position": Vector2(1560.0, 600.0), "rotation": 0.0},
+		{"position": Vector2(1560.0, 600.0), "rotation": 90.0},
 		{"position": Vector2(1450.0, 850.0), "rotation": 0.0},
 	]
 	for location: Dictionary in door_locations:
