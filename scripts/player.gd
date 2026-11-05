@@ -37,11 +37,12 @@ const MAX_MOTIVATION = 8
 @onready var stats_label: Label = $CanvasLayer/StatsLabel
 
 func _process(_delta: float) -> void:
-	stats_label.text = "motivation: %d/%d\nbullets: %d/%d\nMagazines: %d/%d" % [
-		motivation, MAX_MOTIVATION,
-		pistol_bullet, MAX_PISTOL_BULLET,
-		pistol_magazines, MAX_MAG,
-	]
+	stats_label.text = "motivation: %d/%d" % [motivation, MAX_MOTIVATION]
+	if active_weapon == &"pistol":
+		stats_label.text += "\nbullets: %d/%d\nMagazines: %d/%d" % [
+			pistol_bullet, MAX_PISTOL_BULLET,
+			pistol_magazines, MAX_MAG,
+		]
 
 
 func _ready() -> void:
