@@ -60,6 +60,8 @@ func _physics_process(delta: float) -> void:
 	):
 		_fire_pistol()
 		_pistol_cooldown_remaining = pistol_firing_cadence
+	elif Input.is_action_just_pressed("shoot") and active_weapon == &"fists":
+		_punch_targeted_policeman()
 
 	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	velocity = direction * speed
@@ -157,6 +159,27 @@ func _fire_pistol() -> void:
 	projectile.global_position = muzzle.global_position
 	projectile.set("direction", shot_direction)
 	projectile.set("speed", pistol_projectile_speed)
+
+
+func _punch_targeted_policeman() -> void:
+	var attack_direction := Vector2.RIGHT.rotated(aim_pivot.global_rotation)
+	var target: Node2D = null
+	var closest_distance := 64.0
+	for candidate in get_tree().get_nodes_in_group("police"):
+		var policeman := candidate as Node2D
+		if policeman == null or policeman.get("life_state") != &"living":
+			continue
+		var offset := policeman.global_position - global_position
+		var distance := offset.length()
+		if distance > closest_distance or distance == 0.0:
+			continue
+		if attack_direction.dot(offset / distance) < 0.7:
+			continue
+		target = policeman
+		closest_distance = distance
+
+	if target != null:
+		target.call("knock_down")
 
 
 func _on_skin_animation_finished() -> void:
