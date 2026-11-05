@@ -650,6 +650,7 @@ func _test_closed_door_blocks_sight_and_open_door_allows_it() -> void:
 	var policeman := level.get_node("Enemies/Enemy1") as Enemy
 	player.global_position = Vector2(250.0, 225.0)
 	policeman.global_position = Vector2(450.0, 225.0)
+	policeman.get_node("Vision").global_rotation = -PI / 2
 	policeman.speed = 0.0
 	policeman.sight_range = 300.0
 	for frame in range(3):
@@ -675,6 +676,7 @@ func _test_closed_door_blocks_sight_and_open_door_allows_it() -> void:
 	for frame in range(3):
 		await physics_frame
 	policeman.global_position = Vector2(450.0, 225.0)
+	policeman.get_node("Vision").global_rotation = -PI / 2
 	for frame in range(3):
 		await physics_frame
 
