@@ -67,13 +67,13 @@ The following Fibonacci estimates are provisional. No story exceeds 8 points; im
 - Police projectiles pass through other policemen and do not damage them.
 - A shotgun blast causes at most one motivation-damage event to the player, regardless of how many pellets from that blast connect.
 - Police begin unalerted. An unalerted policeman detects the player only when the player is inside his forward-facing vision cone with unobstructed line of sight.
-- The default vision cone angle is 90 degrees. Cone angle and range are configurable per policeman. The default range remains described as approximately one large room until an exact value is selected.
+- The default vision cone angle is 90 degrees and is configurable per policeman. Vision has no distance limit; walls and closed doors clip the visible cone.
 - Walls and closed doors block line of sight. Open doors do not.
 - Vision cones are always visible. A cone is yellow before detection and red while its policeman is alerted.
 - Once a policeman sees the player, he remains alerted until either the player or that policeman dies.
 - An alerted policeman always knows the player's current location, including through walls, and continuously pathfinds toward that location without requiring line of sight.
-- When an alerted policeman has a clear shot, he stops moving and fires from his current position.
-- A policeman waits 0.5 seconds after initial detection before his first shot. A pistol-armed policeman then fires every 0.6 seconds, and a shotgun-armed policeman fires every 1.2 seconds.
+- An alerted policeman pursues and fires at the same time whenever he has a clear shot, stopping movement only at his close stopping distance.
+- A policeman fires immediately on initial detection, without a reaction delay. A pistol-armed policeman then fires every 0.6 seconds, and a shotgun-armed policeman fires every 1.2 seconds.
 - A policeman continuously updates his aim until each shot fires.
 - Gunfire makes every unalerted policeman inside a configurable hearing radius turn toward the shot. Walls do not block or reduce sound.
 - Hearing alone does not alert a policeman. Turning toward the sound may lead to visual detection if the player enters the policeman's vision cone with clear line of sight.
@@ -108,8 +108,8 @@ The following Fibonacci estimates are provisional. No story exceeds 8 points; im
 - Existing player movement, main-menu transition, enemy range, obstacle visibility, and viewport behavior remain regression coverage where those behaviors are still applicable.
 - Level-objective tests verify that the exit stays locked while any policeman is alive, that knocked-down policemen count as alive, and that the exit unlocks only after every policeman is permanently dead.
 - Navigation tests verify the level's rooms, alternate route, automatic doors, door persistence, and the effect of closed and open doors on sight and projectiles.
-- Detection tests verify cone angle and range, line-of-sight obstruction, yellow and red cone states, the initial reaction delay, and the transition from unalerted to permanently alerted.
-- Pursuit tests verify that an alerted policeman continues tracking the player's current position through lost sight and walls, pathfinds toward the player, and stops to fire when a clear shot is available.
+- Detection tests verify cone angle and unlimited distance, line-of-sight obstruction, yellow and red cone states, immediate firing on detection, and the transition from unalerted to permanently alerted.
+- Pursuit tests verify that an alerted policeman continues tracking the player's current position through lost sight and walls, pathfinds toward the player, and keeps pursuing while firing when a clear shot is available.
 - Hearing tests verify that a nearby unalerted policeman turns toward gunfire, that walls do not suppress the event, and that hearing alone does not create the alerted state.
 - Ranged-combat tests verify pistol, shotgun, and AK-47 firing; player one-hit kills against police; shared weapon behavior; unlimited police ammunition; wall and door collisions; police friendly-fire immunity; and a single motivation-damage event per shotgun blast.
 - Magazine tests verify incompatible magazine types, full-magazine pickups, the capacities of 12, 6, and 31, retention for unequipped weapons, the four-magazine limit including the loaded magazine, destructive reloads, empty-magazine destruction, and HUD counts.
@@ -146,7 +146,6 @@ The following Fibonacci estimates are provisional. No story exceeds 8 points; im
 
 ## Further Notes
 
-- The exact default vision range that represents one large room remains undecided.
 - The gunfire hearing radius remains undecided.
 - Pistol, shotgun, AK-47, and thrown-weapon projectile speeds remain undecided.
 - The AK-47 firing cadence and the player's firing cadences for all ranged weapons remain undecided.

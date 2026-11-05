@@ -21,9 +21,9 @@ Every policeman always drops his equipped gun with one full compatible magazine 
 
 The pistol fires one accurate, fast projectile. Each shotgun blast fires six fast projectiles in a fixed spread and consumes one shotgun magazine round. An entire shotgun blast removes motivation only once, regardless of how many pellets hit the player. Projectiles fired by the player kill policemen in one hit and stop at walls and closed doors, with no penetration, ricochets, headshots, or damage falloff. Police bullets pass through other policemen.
 
-Police initially detect the player inside a visible, forward-facing vision cone when there is a clear line of sight. The cone uses a shared default of 90 degrees and a range of about one large room, while its range and angle remain configurable per policeman. Walls and closed doors block sight. The vision cone is yellow normally and red during detection.
+Police initially detect the player inside a visible, forward-facing vision cone when there is a clear line of sight. The cone uses a shared default of 90 degrees with no distance limit; its angle remains configurable per policeman. Walls and closed doors block sight. The vision cone is yellow normally and red during detection.
 
-Once a policeman sees the player, he remains alerted until either the player or policeman dies. An alerted policeman always knows the player's current location, including through walls, and continuously pathfinds toward the player even without line of sight. When he has a clear shot, he stops moving and fires. A policeman waits 0.5 seconds after first detection before firing, then fires a pistol every 0.6 seconds or a shotgun every 1.2 seconds. He aims continuously until each shot.
+Once a policeman sees the player, he remains alerted until either the player or policeman dies. An alerted policeman always knows the player's current location, including through walls, and continuously pathfinds toward the player even without line of sight. When he has a clear shot, he fires immediately while continuing to pursue the player. He then fires a pistol every 0.6 seconds or a shotgun every 1.2 seconds. He aims continuously until each shot.
 
 Gunfire makes every unalerted policeman within a configurable radius turn toward the shot. Walls do not block or reduce sound. Hearing alone does not alert the policeman unless turning places the player inside his vision cone with clear line of sight.
 
@@ -51,7 +51,6 @@ Use Godot 4.7 and GDScript. Use placeholder art rather than polished art. The de
 
 ## Open questions
 
-- What exact vision range should represent one large room?
 - What is the gunfire hearing radius?
 - What are the pistol, shotgun, AK-47, and thrown-weapon projectile speeds?
 - What are the AK-47 firing cadence and the player's firing cadences for all ranged weapons?
