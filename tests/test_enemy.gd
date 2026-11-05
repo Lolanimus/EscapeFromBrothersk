@@ -171,6 +171,7 @@ func _test_alerted_enemy_takes_the_shortest_doorway_route_to_the_player() -> voi
 	enemy.sight_range = 100.0
 	enemy.stop_distance = 0.0
 	enemy.speed = 300.0
+	enemy.get_node("Vision").global_rotation = (player.global_position - enemy.global_position).angle() + PI / 2
 	await physics_frame
 	await physics_frame
 
@@ -207,6 +208,7 @@ func _test_alerted_enemy_crosses_a_doorway_without_getting_stuck() -> void:
 	enemy.sight_range = 100.0
 	enemy.stop_distance = 0.0
 	enemy.speed = 160.0
+	enemy.get_node("Vision").global_rotation = (player.global_position - enemy.global_position).angle() + PI / 2
 	await physics_frame
 	await physics_frame
 
@@ -238,6 +240,7 @@ func _test_alerted_enemy_routes_around_a_wall_between_two_doorways() -> void:
 	enemy.sight_range = 100.0
 	enemy.stop_distance = 40.0
 	enemy.speed = 160.0
+	enemy.get_node("Vision").global_rotation = (player.global_position - enemy.global_position).angle() + PI / 2
 	await physics_frame
 	await physics_frame
 

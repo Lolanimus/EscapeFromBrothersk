@@ -1,0 +1,72 @@
+extends Node2D
+
+@export_range(1.0, 180.0, 1.0) var vision_angle: float = 90.0
+@export var cone_color: Color = Color(1.0, 0.85, 0.0, 0.35)
+@export var alerted_color: Color = Color(1.0, 0.0, 0.0, 0.45)
+@export_range(0.0, 30.0, 0.1) var turn_speed: float = 6.0  # radians per second, 0 = snap instantly
+
+var is_alerted: bool = false
+
+func set_alerted(value: bool) -> void:
+	is_alerted = value
+	queue_redraw()
+@export_flags_2d_physics var vision_collision_mask: int = 1
+
+func face_point(world_point: Vector2, delta: float) -> void:
+	# The cone points "up" (-Y), and angle() measures from +X, so add 90 degrees.
+	var target_angle := (world_point - global_position).angle() + PI / 2.0
+	if turn_speed <= 0.0:
+		global_rotation = target_angle
+	else:
+		global_rotation = rotate_toward(global_rotation, target_angle, turn_speed * delta)
+
+func _process(_delta: float) -> void:
+	queue_redraw()
+
+func _draw() -> void:
+	var points := PackedVector2Array()
+	var half_angle: float = deg_to_rad(vision_angle / 2.0)
+	var segments: int = 64
+	var space_state := get_world_2d().direct_space_state
+
+	# Detection has no distance limit. Draw only as far as the visible viewport.
+	var inverse_canvas := get_canvas_transform().affine_inverse()
+	var viewport_size := get_viewport_rect().size
+	var draw_range := 1.0
+	for corner in [Vector2.ZERO, Vector2(viewport_size.x, 0), viewport_size, Vector2(0, viewport_size.y)]:
+		draw_range = maxf(draw_range, global_position.distance_to(inverse_canvas * corner))
+	draw_range += 100.0
+	points.append(Vector2.ZERO)
+
+	for i in range(segments + 1):
+		var angle: float = lerp(
+			-half_angle,
+			half_angle,
+			float(i) / float(segments)
+		)
+
+		var direction := Vector2(sin(angle), -cos(angle)).rotated(global_rotation)
+		var end_point: Vector2 = global_position + direction * draw_range
+
+		var query := PhysicsRayQueryParameters2D.create(
+			global_position,
+			end_point
+		)
+		query.exclude = [get_parent().get_rid()]
+		query.collision_mask = vision_collision_mask
+
+		var result: Dictionary = space_state.intersect_ray(query)
+		var local_point: Vector2
+
+		if result.is_empty():
+			local_point = to_local(end_point)
+		else:
+			local_point = to_local(result["position"])
+
+		points.append(local_point)
+
+	var current_color: Color = alerted_color if is_alerted else cone_color
+	var outline_color: Color = Color.RED if is_alerted else Color.YELLOW
+
+	draw_colored_polygon(points, current_color)
+	draw_polyline(points, outline_color, 2.0, true)

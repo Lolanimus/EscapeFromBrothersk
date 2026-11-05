@@ -8,9 +8,9 @@
 
 **Status:** ready-for-agent
 
-- [ ] Every unalerted policeman has an always-visible, forward-facing yellow vision cone with a 90-degree shared default angle and per-policeman configurable angle and range.
+- [ ] Every unalerted policeman has an always-visible, forward-facing yellow vision cone with a 90-degree shared default angle and per-policeman configurable angle and no distance limit.
 - [ ] Detection occurs only while the player is inside the cone with unobstructed line of sight.
 - [ ] Walls and closed doors block detection, while open doors do not.
 - [ ] Detection changes the cone to red and exposes clear observable feedback.
-- [ ] The default range representing approximately one large room is selected, documented, configurable, and tested.
+- [ ] Sight has no distance cutoff; distant detection and wall obstruction are covered by scene tests.
 

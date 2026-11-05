@@ -30,6 +30,8 @@ const DEAD_COLOR := Color(0.2, 0.22, 0.26, 1.0)
 # whenever the variable is @onready,
 # it gets initialized shen the node becomes ready
 @onready var target: CharacterBody2D = get_node_or_null(target_path) as CharacterBody2D
+@onready var vision: Node2D = get_node_or_null("Vision")
+@onready var gun: EnemyGun = get_node_or_null("Gun") as EnemyGun
 
 var is_alerted: bool = false
 var life_state: StringName = &"living"
@@ -79,17 +81,35 @@ func _process(delta: float) -> void:
 			_update_state_presentation()
 
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if life_state == &"dead" or life_state == &"knocked_down" or life_state == &"recovering":
 		velocity = Vector2.ZERO
+		if gun != null:
+			gun.set_trigger(false)
 		return
 
 	velocity = Vector2.ZERO
 
-	if target != null and not is_alerted and _can_see_target():
+	if is_alerted and vision != null and target != null:
+		vision.face_point(target.global_position, delta)
+
+	var player_in_cone := _is_player_inside_cone()
+
+	# Red only while the player is inside the drawn cone.
+	if vision != null:
+		vision.set_alerted(player_in_cone)
+
+	# Point the gun at the player, and shoot only while he is in the cone.
+	if gun != null:
+		if target != null and (is_alerted or player_in_cone):
+			gun.aim_at(target.global_position)
+		gun.set_trigger(player_in_cone)
+
+	if target != null and not is_alerted and (player_in_cone if vision != null else _can_see_target()):
 		is_alerted = true
 		alerted.emit()
 
+	# Chase while firing; losing sight does not cancel pursuit.
 	if target != null and is_alerted:
 		var distance_to_target := global_position.distance_to(target.global_position)
 		if distance_to_target > stop_distance:
@@ -108,10 +128,15 @@ func take_player_projectile_hit() -> void:
 	velocity = Vector2.ZERO
 	collision_layer = 0
 	collision_mask = 0
+	modulate = Color(0.35, 0.35, 0.35, 1.0)
+	if gun != null:
+		gun.set_trigger(false)
 	set_physics_process(false)
 	recovery_time_remaining = 0.0
 	recovery_warning.visible = false
 	_update_state_presentation()
+	if target != null and target.has_method("on_enemy_killed"):
+		target.on_enemy_killed()
 
 
 func knock_down() -> void:
@@ -121,10 +146,16 @@ func knock_down() -> void:
 	recovery_time_remaining = KNOCKDOWN_DURATION
 	recovery_warning.visible = false
 	velocity = Vector2.ZERO
+	if gun != null:
+		gun.set_trigger(false)
 	_update_state_presentation()
 
 
 func _update_state_presentation() -> void:
+	if gun != null:
+		gun.visible = life_state == &"living"
+	if vision != null:
+		vision.visible = life_state == &"living"
 	match life_state:
 		&"living":
 			police_visual.color = LIVING_COLOR
@@ -174,3 +205,21 @@ func _can_see_target() -> bool:
 
 	var result := get_world_2d().direct_space_state.intersect_ray(query)
 	return result.is_empty() or result.get("collider") == target
+
+
+func _is_player_inside_cone() -> bool:
+	if target == null or vision == null:
+		return false
+
+	var to_player := target.global_position - vision.global_position
+
+	# Outside the cone's angle? The cone points "up" in its own space.
+	var forward := Vector2.UP.rotated(vision.global_rotation)
+	if absf(forward.angle_to(to_player)) > deg_to_rad(vision.vision_angle / 2.0):
+		return false
+
+	# Behind a wall that cuts the cone short?
+	var query := PhysicsRayQueryParameters2D.create(vision.global_position, target.global_position)
+	query.exclude = [get_rid()]
+	query.collision_mask = vision.vision_collision_mask
+	return get_world_2d().direct_space_state.intersect_ray(query).is_empty()
