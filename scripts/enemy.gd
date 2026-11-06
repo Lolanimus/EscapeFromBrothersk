@@ -82,8 +82,12 @@ func _process(delta: float) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if life_state == &"dead" or life_state == &"knocked_down" or life_state == &"recovering":
+	if life_state != &"living" or (target is Player and target.is_dead):
 		velocity = Vector2.ZERO
+		if target is Player and target.is_dead:
+			is_alerted = false
+			if vision != null:
+				vision.set_alerted(false)
 		if gun != null:
 			gun.set_trigger(false)
 		return

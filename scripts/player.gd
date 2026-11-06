@@ -1,6 +1,8 @@
 class_name Player
 extends CharacterBody2D
 
+signal died
+
 const PistolProjectileScene := preload("res://scenes/pistol_projectile.tscn")
 const FRONT_SPRITE_SCALE := Vector2(0.036772487, 0.033333333)
 const ACTION_SPRITE_SCALE := Vector2(0.075, 0.075)
@@ -21,13 +23,14 @@ var _pistol_animation_playing := false
 var _last_facing: StringName = &"side"
 var _last_side_faces_right := false
 
-var motivation:= 8
+var is_dead := false
+var motivation := 100
 var pistol_magazines = 3
 var pistol_bullet = 12
 
 const MAX_MAG = 3
 const MAX_PISTOL_BULLET = 12
-const MAX_MOTIVATION = 8
+const MAX_MOTIVATION = 100
 
 
 
@@ -37,6 +40,7 @@ const MAX_MOTIVATION = 8
 @onready var stats_label: Label = $CanvasLayer/StatsLabel
 
 func _process(_delta: float) -> void:
+	$CanvasLayer/MotivationBar.value = motivation
 	stats_label.text = "motivation: %d/%d" % [motivation, MAX_MOTIVATION]
 	if active_weapon == &"pistol":
 		stats_label.text += "\nbullets: %d/%d\nMagazines: %d/%d" % [
@@ -52,7 +56,7 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event is not InputEventMouseMotion:
+	if is_dead or event is not InputEventMouseMotion:
 		return
 
 	var mouse_motion := event as InputEventMouseMotion
@@ -69,6 +73,8 @@ func _input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if is_dead:
+		return
 	_pistol_cooldown_remaining = maxf(_pistol_cooldown_remaining - delta, 0.0)
 	if Input.is_action_just_pressed("interact"):
 		_acquire_nearest_weapon()
@@ -224,12 +230,22 @@ func _update_skin_frame_offset() -> void:
 
 # Called by enemy bullets when they hit the player.
 func take_police_projectile_hit() -> void:
-	motivation = maxi(motivation - 1, 0)
+	if is_dead:
+		return
+	motivation = maxi(motivation - 25, 0)
+	if motivation == 0:
+		is_dead = true
+		velocity = Vector2.ZERO
+		skin.stop()
+		$CanvasLayer/DeathNotice.show()
+		died.emit()
 
 
 # Called by an enemy when the player kills him.
 func on_enemy_killed() -> void:
-	motivation = mini(motivation + 1, MAX_MOTIVATION)
+	if is_dead:
+		return
+	motivation = mini(motivation + 10, MAX_MOTIVATION)
 
 
 

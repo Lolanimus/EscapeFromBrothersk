@@ -54,12 +54,15 @@ func _run() -> void:
 	var shots_after_knockdown := police_shots
 	await create_timer(1.2).timeout
 	check(police_shots == shots_after_knockdown and player.motivation == downed_motivation, "knocked-down policeman stops shooting")
+	var position_before_recovery: Vector2 = player.global_position
+	player.global_position = Vector2(225, 225)
 	var old_time_scale := Engine.time_scale
 	Engine.time_scale = 15.0
 	await create_timer(15.1).timeout
 	Engine.time_scale = old_time_scale
 	check(enemy.life_state == &"living" and enemy.get_node("Gun").visible,
 		"recovered policeman stands up with his gun")
+	player.global_position = position_before_recovery
 	var shots_before_recovery := police_shots
 	await create_timer(1.2).timeout
 	check(police_shots > shots_before_recovery, "recovered policeman resumes shooting")
