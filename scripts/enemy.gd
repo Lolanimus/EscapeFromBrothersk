@@ -124,6 +124,10 @@ func _physics_process(delta: float) -> void:
 
 
 func take_player_projectile_hit() -> void:
+	kill_permanently()
+
+
+func kill_permanently() -> void:
 	if life_state != &"living" and life_state != &"knocked_down" and life_state != &"recovering":
 		return
 
