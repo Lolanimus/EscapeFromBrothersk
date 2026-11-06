@@ -166,6 +166,8 @@ func _test_alerted_enemy_takes_the_shortest_doorway_route_to_the_player() -> voi
 
 	var player := level.get_node("Player") as CharacterBody2D
 	var enemy := level.get_node("Enemies/Enemy1") as CharacterBody2D
+	# Route tests isolate navigation from the now-lethal gunfire.
+	enemy.get_node("Gun").set_physics_process(false)
 	player.global_position = Vector2(650.0, 300.0)
 	enemy.global_position = Vector2(600.0, 300.0)
 	enemy.sight_range = 100.0
@@ -203,6 +205,8 @@ func _test_alerted_enemy_crosses_a_doorway_without_getting_stuck() -> void:
 
 	var player := level.get_node("Player") as CharacterBody2D
 	var enemy := level.get_node("Enemies/Enemy1") as CharacterBody2D
+	# Route tests isolate navigation from the now-lethal gunfire.
+	enemy.get_node("Gun").set_physics_process(false)
 	player.global_position = Vector2(770.0, 475.0)
 	enemy.global_position = Vector2(900.0, 475.0)
 	enemy.sight_range = 100.0
@@ -239,6 +243,8 @@ func _test_alerted_enemy_routes_around_a_wall_between_two_doorways() -> void:
 
 	var player := level.get_node("Player") as CharacterBody2D
 	var enemy := level.get_node("Enemies/Enemy1") as CharacterBody2D
+	# Route tests isolate navigation from the now-lethal gunfire.
+	enemy.get_node("Gun").set_physics_process(false)
 	player.global_position = Vector2(1090.0, 430.0)
 	enemy.global_position = Vector2(1075.0, 430.0)
 	enemy.sight_range = 100.0

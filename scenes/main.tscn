@@ -199,6 +199,53 @@ offset_top = 547.0
 offset_right = 230.0
 offset_bottom = 648.0
 
+[node name="MotivationBar" type="ProgressBar" parent="Player/CanvasLayer"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 236.0
+offset_bottom = 40.0
+value = 100.0
+mouse_filter = 2
+
+[node name="ChokeLabel" type="Label" parent="Player/CanvasLayer"]
+visible = false
+offset_left = 420.0
+offset_top = 510.0
+offset_right = 732.0
+offset_bottom = 536.0
+text = "CHOKING — hold left click"
+horizontal_alignment = 1
+mouse_filter = 2
+
+[node name="ChokeProgress" type="ProgressBar" parent="Player/CanvasLayer"]
+visible = false
+offset_left = 436.0
+offset_top = 540.0
+offset_right = 716.0
+offset_bottom = 564.0
+max_value = 3.0
+mouse_filter = 2
+
+[node name="DeathNotice" type="Label" parent="Player/CanvasLayer"]
+visible = false
+offset_left = 400.0
+offset_top = 260.0
+offset_right = 752.0
+offset_bottom = 340.0
+theme_override_font_sizes/font_size = 42
+text = "YOU DIED"
+horizontal_alignment = 1
+mouse_filter = 2
+
+[node name="RestartButton" type="Button" parent="Player/CanvasLayer"]
+visible = false
+offset_left = 466.0
+offset_top = 352.0
+offset_right = 686.0
+offset_bottom = 404.0
+theme_override_font_sizes/font_size = 22
+text = "Restart level"
+
 [node name="Pickups" type="Node2D" parent="." unique_id=272605550]
 
 [node name="Pistol" type="Area2D" parent="Pickups" unique_id=1674564713 groups=["weapon_pickups"]]

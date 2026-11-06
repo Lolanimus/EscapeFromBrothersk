@@ -1,12 +1,16 @@
 class_name Player
 extends CharacterBody2D
 
+signal died
+
 const PistolProjectileScene := preload("res://scenes/pistol_projectile.tscn")
 const FRONT_SPRITE_SCALE := Vector2(0.036772487, 0.033333333)
 const ACTION_SPRITE_SCALE := Vector2(0.075, 0.075)
 const SKIN_BASE_POSITION := Vector2(0.0, -1.0)
 const SIDE_MUZZLE_OFFSET := Vector2(21.0, -13.0)
 const REAR_MUZZLE_OFFSET := Vector2(11.0, -16.0)
+const CHOKE_DURATION := 3.0
+const CHOKE_DISTANCE := 64.0
 
 @export_range(0.0, 1000.0, 1.0) var speed: float = 280.0:
 	set(value):
@@ -21,13 +25,17 @@ var _pistol_animation_playing := false
 var _last_facing: StringName = &"side"
 var _last_side_faces_right := false
 
-var motivation:= 8
+var _choke_target: Enemy
+var _choke_elapsed := 0.0
+var _choke_requires_release := false
+var is_dead := false
+var motivation := 100
 var pistol_magazines = 3
 var pistol_bullet = 12
 
 const MAX_MAG = 3
 const MAX_PISTOL_BULLET = 12
-const MAX_MOTIVATION = 8
+const MAX_MOTIVATION = 100
 
 
 
@@ -37,6 +45,10 @@ const MAX_MOTIVATION = 8
 @onready var stats_label: Label = $CanvasLayer/StatsLabel
 
 func _process(_delta: float) -> void:
+	$CanvasLayer/MotivationBar.value = motivation
+	$CanvasLayer/ChokeProgress.value = _choke_elapsed
+	$CanvasLayer/ChokeProgress.visible = _choke_elapsed > 0.0
+	$CanvasLayer/ChokeLabel.visible = _choke_elapsed > 0.0
 	stats_label.text = "motivation: %d/%d" % [motivation, MAX_MOTIVATION]
 	if active_weapon == &"pistol":
 		stats_label.text += "\nbullets: %d/%d\nMagazines: %d/%d" % [
@@ -46,13 +58,14 @@ func _process(_delta: float) -> void:
 
 
 func _ready() -> void:
+	$CanvasLayer/RestartButton.pressed.connect(_restart_level)
 	skin.animation_finished.connect(_on_skin_animation_finished)
 	skin.frame_changed.connect(_update_skin_frame_offset)
 	_show_stationary_pose()
 
 
 func _input(event: InputEvent) -> void:
-	if event is not InputEventMouseMotion:
+	if is_dead or event is not InputEventMouseMotion:
 		return
 
 	var mouse_motion := event as InputEventMouseMotion
@@ -69,6 +82,12 @@ func _input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if is_dead:
+		return
+	if _update_choke(delta):
+		velocity = Vector2.ZERO
+		_update_movement_animation(Vector2.ZERO)
+		return
 	_pistol_cooldown_remaining = maxf(_pistol_cooldown_remaining - delta, 0.0)
 	if Input.is_action_just_pressed("interact"):
 		_acquire_nearest_weapon()
@@ -224,12 +243,25 @@ func _update_skin_frame_offset() -> void:
 
 # Called by enemy bullets when they hit the player.
 func take_police_projectile_hit() -> void:
-	motivation = maxi(motivation - 1, 0)
+	if is_dead:
+		return
+	_cancel_choke(true)
+	motivation = maxi(motivation - 25, 0)
+	if motivation == 0:
+		is_dead = true
+		velocity = Vector2.ZERO
+		skin.stop()
+		$CanvasLayer/DeathNotice.show()
+		$CanvasLayer/RestartButton.show()
+		$CanvasLayer/RestartButton.grab_focus()
+		died.emit()
 
 
 # Called by an enemy when the player kills him.
 func on_enemy_killed() -> void:
-	motivation = mini(motivation + 1, MAX_MOTIVATION)
+	if is_dead:
+		return
+	motivation = mini(motivation + 10, MAX_MOTIVATION)
 
 
 
@@ -243,3 +275,63 @@ func _reload_pistol() -> void:
 
 	pistol_magazines -= 1
 	pistol_bullet = MAX_PISTOL_BULLET
+
+
+func _update_choke(delta: float) -> bool:
+	if active_weapon != &"fists" or not Input.is_action_pressed("shoot"):
+		_cancel_choke()
+		return false
+	if _choke_requires_release:
+		return false
+	if (
+		Input.is_action_pressed("move_left") or Input.is_action_pressed("move_right")
+		or Input.is_action_pressed("move_up") or Input.is_action_pressed("move_down")
+	):
+		var was_choking := is_instance_valid(_choke_target)
+		_cancel_choke(true)
+		return was_choking
+	if _choke_elapsed > 0.0 and (not is_instance_valid(_choke_target) or not _can_choke(_choke_target)):
+		_cancel_choke(true)
+		return true
+	if not is_instance_valid(_choke_target):
+		var nearest_distance := CHOKE_DISTANCE
+		for node in get_tree().get_nodes_in_group("police"):
+			var candidate := node as Enemy
+			if not _can_choke(candidate):
+				continue
+			var distance := global_position.distance_to(candidate.global_position)
+			if distance <= nearest_distance:
+				_choke_target = candidate
+				nearest_distance = distance
+	if not is_instance_valid(_choke_target):
+		return false
+	_choke_elapsed += delta
+	if _choke_elapsed >= CHOKE_DURATION:
+		_choke_target.kill_permanently()
+		_choke_target = null
+		_choke_elapsed = 0.0
+	return true
+
+
+func _cancel_choke(require_release: bool = false) -> void:
+	_choke_target = null
+	_choke_elapsed = 0.0
+	_choke_requires_release = require_release and Input.is_action_pressed("shoot")
+
+
+func _can_choke(candidate: Enemy) -> bool:
+	if not is_instance_valid(candidate) or candidate.life_state not in [&"knocked_down", &"recovering"]:
+		return false
+	if global_position.distance_to(candidate.global_position) > CHOKE_DISTANCE:
+		return false
+	var query := PhysicsRayQueryParameters2D.create(global_position, candidate.global_position)
+	query.collision_mask = collision_mask
+	query.exclude = [get_rid(), candidate.get_rid()]
+	return get_world_2d().direct_space_state.intersect_ray(query).is_empty()
+
+
+func _restart_level() -> void:
+	if not is_dead:
+		return
+	$CanvasLayer/RestartButton.disabled = true
+	get_tree().call_deferred("reload_current_scene")
