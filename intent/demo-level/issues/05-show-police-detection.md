@@ -6,11 +6,11 @@
 
 **Blocked by:** 01: Navigate the prison and alternate passage; 04: Operate automatic doors.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Every unalerted policeman has an always-visible, forward-facing yellow vision cone with a 90-degree shared default angle and per-policeman configurable angle and no distance limit.
-- [ ] Detection occurs only while the player is inside the cone with unobstructed line of sight.
-- [ ] Walls and closed doors block detection, while open doors do not.
-- [ ] Detection changes the cone to red and exposes clear observable feedback.
-- [ ] Sight has no distance cutoff; distant detection and wall obstruction are covered by scene tests.
+- [x] Every unalerted policeman has an always-visible, forward-facing yellow vision cone with a 90-degree shared default angle and per-policeman configurable angle and no distance limit.
+- [x] Detection occurs only while the player is inside the cone with unobstructed line of sight.
+- [x] Walls and closed doors block detection, while open doors do not.
+- [x] Detection changes the cone to red and exposes clear observable feedback.
+- [x] Sight has no distance cutoff; distant detection and wall obstruction are covered by scene tests.
 
