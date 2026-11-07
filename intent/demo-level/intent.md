@@ -60,5 +60,5 @@ Use Godot 4.7 and GDScript. Use placeholder art rather than polished art. The de
 - What happens when the player tries to collect a magazine type already at the four-magazine limit?
 - What are the katana swing's exact reach, arc angle, and cadence?
 - Where is the katana placed in the level?
-- What scene should load after completing the demo level?
+- Story 12 selects `res://scenes/next_level.tscn`, a placeholder destination, configurable on the level's `next_level_scene` property.
 - What are the exact dimensions and geometry of the rooms and alternate passage?
