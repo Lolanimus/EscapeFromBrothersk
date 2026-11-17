@@ -226,6 +226,7 @@ func _test_player_and_camera_can_travel_beyond_the_initial_viewport() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
 	current_scene = level
+	_disable_police_gunfire(level)
 	await process_frame
 
 	var player := level.get_node("Player") as CharacterBody2D
@@ -319,6 +320,7 @@ func _test_player_can_reach_storage_from_the_guard_office() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
 	current_scene = level
+	_disable_police_gunfire(level)
 	await process_frame
 
 	var player := level.get_node("Player") as CharacterBody2D
@@ -340,6 +342,7 @@ func _test_player_can_enter_the_central_corridor_from_storage() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
 	current_scene = level
+	_disable_police_gunfire(level)
 	await process_frame
 
 	var player := level.get_node("Player") as CharacterBody2D
@@ -366,6 +369,7 @@ func _test_player_can_reach_the_exercise_yard_from_the_corridor() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
 	current_scene = level
+	_disable_police_gunfire(level)
 	await process_frame
 
 	var player := level.get_node("Player") as CharacterBody2D
@@ -399,6 +403,7 @@ func _test_player_can_reach_the_exit_from_the_exercise_yard() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
 	current_scene = level
+	_disable_police_gunfire(level)
 	await process_frame
 
 	var player := level.get_node("Player") as CharacterBody2D
@@ -438,6 +443,7 @@ func _test_player_can_use_the_alternate_side_passage_to_the_yard() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
 	current_scene = level
+	_disable_police_gunfire(level)
 	await process_frame
 
 	var player := level.get_node("Player") as CharacterBody2D
@@ -502,6 +508,7 @@ func _test_player_can_traverse_every_prison_door() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
 	current_scene = level
+	_disable_police_gunfire(level)
 	await process_frame
 
 	var doors := get_nodes_in_group("automatic_doors")
@@ -696,3 +703,11 @@ func _expect(condition: bool, message: String) -> void:
 
 	_failures += 1
 	push_error("FAIL: %s" % message)
+
+
+func _disable_police_gunfire(level: Node) -> void:
+	# Navigation fixtures test traversability; combat is exercised by its own suites.
+	for policeman in level.get_node("Enemies").get_children():
+		var gun := policeman.get_node_or_null("Gun")
+		if gun != null:
+			gun.set_physics_process(false)

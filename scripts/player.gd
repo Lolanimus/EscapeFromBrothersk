@@ -3,7 +3,10 @@ extends CharacterBody2D
 
 signal died
 
-const PistolProjectileScene := preload("res://scenes/pistol_projectile.tscn")
+const RangedWeapon := preload("res://scripts/ranged_weapon.gd")
+const ThrownWeaponScript := preload("res://scripts/thrown_weapon.gd")
+const SHOTGUN_TEXTURE := preload("res://assets/sprites/weapon/shotgun.png")
+const AK47_TEXTURE := preload("res://assets/sprites/weapon/ak47.png")
 const FRONT_SPRITE_SCALE := Vector2(0.036772487, 0.033333333)
 const ACTION_SPRITE_SCALE := Vector2(0.075, 0.075)
 const SKIN_BASE_POSITION := Vector2(0.0, -1.0)
@@ -18,6 +21,11 @@ const CHOKE_DISTANCE := 64.0
 @export_range(0.0, 200.0, 1.0) var interaction_distance: float = 64.0
 @export_range(0.0, 4000.0, 1.0) var pistol_projectile_speed: float = 1200.0
 @export_range(0.0, 10.0, 0.01) var pistol_firing_cadence: float = 0.25
+@export_range(0.0, 4000.0, 1.0) var shotgun_projectile_speed: float = 1200.0
+@export_range(0.0, 10.0, 0.01) var shotgun_firing_cadence: float = 0.8
+@export_range(0.0, 4000.0, 1.0) var ak47_projectile_speed: float = 1200.0
+@export_range(0.0, 10.0, 0.01) var ak47_firing_cadence: float = 0.1
+@export_range(0.0, 4000.0, 1.0) var thrown_weapon_speed: float = 800.0
 
 var active_weapon: StringName = &"fists"
 var _pistol_cooldown_remaining := 0.0
@@ -39,6 +47,9 @@ const MAX_MOTIVATION = 100
 
 var shotgun_magazines: int = 0
 var ak47_magazines: int = 0
+var shotgun_bullet: int = 6
+var ak47_bullet: int = 31
+var _held_gun: Sprite2D
 
 const MAX_MAGAZINES_PER_WEAPON := 4
 
@@ -54,9 +65,13 @@ func _process(_delta: float) -> void:
 	$CanvasLayer/ChokeProgress.visible = _choke_elapsed > 0.0
 	$CanvasLayer/ChokeLabel.visible = _choke_elapsed > 0.0
 	stats_label.text = "motivation: %d/%d" % [motivation, MAX_MOTIVATION]
-	#test
 	stats_label.text += "\nShotgun magazines: " + str(shotgun_magazines)
 	stats_label.text += "\nAK-47 magazines: " + str(ak47_magazines)
+	stats_label.text += "\nActive: " + String(active_weapon)
+	if active_weapon in [&"pistol", &"shotgun", &"ak47"]:
+		stats_label.text += "\nLoaded: %d/%d" % [get_loaded_rounds(), RangedWeapon.capacity(active_weapon)]
+		if get_loaded_rounds() == 0:
+			stats_label.text += " EMPTY"
 	
 	
 	if active_weapon == &"pistol":
@@ -72,6 +87,13 @@ func _process(_delta: float) -> void:
 
 
 func _ready() -> void:
+	_held_gun = Sprite2D.new()
+	_held_gun.name = "HeldGun"
+	_held_gun.position = Vector2(15.0, 0.0)
+	_held_gun.flip_h = true
+	_held_gun.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	aim_pivot.add_child(_held_gun)
+	_update_held_gun()
 	$CanvasLayer/RestartButton.pressed.connect(_restart_level)
 	skin.animation_finished.connect(_on_skin_animation_finished)
 	skin.frame_changed.connect(_update_skin_frame_offset)
@@ -106,19 +128,29 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("interact"):
 		_acquire_nearest_weapon()
 		_collect_nearest_magazine()
+	if Input.is_action_just_pressed("throw_weapon"):
+		_throw_active_weapon()
 	if (
-		Input.is_action_just_pressed("shoot")
-		and active_weapon == &"pistol"
-		and pistol_bullet > 0
+		(Input.is_action_pressed("shoot") if active_weapon == &"ak47" else Input.is_action_just_pressed("shoot"))
+		and active_weapon in [&"pistol", &"shotgun", &"ak47"]
+		and get_loaded_rounds() > 0
 		and is_zero_approx(_pistol_cooldown_remaining)
 	):
-		_fire_pistol()
-		pistol_bullet -= 1
-		_pistol_cooldown_remaining = pistol_firing_cadence
+		if active_weapon == &"pistol":
+			_fire_pistol()
+		else:
+			var shot_direction := Vector2.RIGHT.rotated(aim_pivot.global_rotation)
+			var projectile_speed := shotgun_projectile_speed if active_weapon == &"shotgun" else ak47_projectile_speed
+			RangedWeapon.fire(get_tree().current_scene, active_weapon, global_position + shot_direction * 24.0, shot_direction, projectile_speed)
+		_set_loaded_rounds(active_weapon, get_loaded_rounds() - 1)
+		match active_weapon:
+			&"pistol": _pistol_cooldown_remaining = pistol_firing_cadence
+			&"shotgun": _pistol_cooldown_remaining = shotgun_firing_cadence
+			&"ak47": _pistol_cooldown_remaining = ak47_firing_cadence
 	elif Input.is_action_just_pressed("shoot") and active_weapon == &"fists":
 		_punch_targeted_policeman()
 	if Input.is_action_just_pressed("reload"):
-		_reload_pistol()
+		_reload_active_weapon()
 
 
 	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
@@ -190,7 +222,13 @@ func _acquire_nearest_weapon() -> void:
 	if nearest_pickup == null:
 		return
 
-	active_weapon = StringName(nearest_pickup.get("weapon_type"))
+	var incoming_type := StringName(nearest_pickup.get("weapon_type"))
+	var rounds := int(nearest_pickup.get("loaded_rounds"))
+	if rounds != 0 and _get_reserve_magazines(incoming_type) >= MAX_MAGAZINES_PER_WEAPON:
+		return
+	active_weapon = incoming_type
+	_set_loaded_rounds(active_weapon, rounds if rounds >= 0 else RangedWeapon.capacity(active_weapon))
+	_update_held_gun()
 	nearest_pickup.queue_free()
 	_update_movement_animation(
 		Input.get_vector("move_left", "move_right", "move_up", "move_down")
@@ -217,22 +255,11 @@ func _collect_nearest_magazine() -> void:
 	if nearest == null:
 		return
 
-	match nearest.weapon_type:
-		"pistol":
-			if active_weapon == &"pistol" and pistol_bullet == -1:
-				pistol_bullet = MAX_PISTOL_BULLET
-			else:
-				if pistol_magazines >= MAX_MAGAZINES_PER_WEAPON - 1:
-					return
-			pistol_magazines += 1
-		"shotgun":
-			if shotgun_magazines >= MAX_MAGAZINES_PER_WEAPON - 1:
-				return
-			shotgun_magazines += 1
-		"ak47":
-			if ak47_magazines >= MAX_MAGAZINES_PER_WEAPON - 1:
-				return
-			ak47_magazines += 1
+	var weapon_type := StringName(nearest.weapon_type)
+	var loaded_magazines := 1 if active_weapon == weapon_type and get_loaded_rounds() > 0 else 0
+	if _get_reserve_magazines(weapon_type) + loaded_magazines >= MAX_MAGAZINES_PER_WEAPON:
+		return
+	_set_reserve_magazines(weapon_type, _get_reserve_magazines(weapon_type) + 1)
 			
 	_show_pickup_feedback("Magazine collected!")
 	nearest.queue_free()
@@ -255,11 +282,47 @@ func _fire_pistol() -> void:
 			SIDE_MUZZLE_OFFSET.y
 		)
 
-	var projectile := PistolProjectileScene.instantiate() as Area2D
-	get_tree().current_scene.add_child(projectile)
-	projectile.global_position = muzzle.global_position
-	projectile.set("direction", shot_direction)
-	projectile.set("speed", pistol_projectile_speed)
+	RangedWeapon.fire(get_tree().current_scene, &"pistol", muzzle.global_position, shot_direction, pistol_projectile_speed)
+
+
+func get_loaded_rounds() -> int:
+	match active_weapon:
+		&"pistol": return pistol_bullet
+		&"shotgun": return shotgun_bullet
+		&"ak47": return ak47_bullet
+	return 0
+
+
+func _set_loaded_rounds(weapon_type: StringName, rounds: int) -> void:
+	match weapon_type:
+		&"pistol": pistol_bullet = maxi(rounds, 0)
+		&"shotgun": shotgun_bullet = maxi(rounds, 0)
+		&"ak47": ak47_bullet = maxi(rounds, 0)
+
+
+func _throw_active_weapon() -> void:
+	if active_weapon not in [&"pistol", &"shotgun", &"ak47"]:
+		return
+	var thrown := ThrownWeaponScript.new()
+	thrown.weapon_type = active_weapon
+	thrown.loaded_rounds = get_loaded_rounds()
+	get_tree().current_scene.add_child(thrown)
+	thrown.global_position = global_position
+	thrown.launch(Vector2.RIGHT.rotated(aim_pivot.global_rotation), thrown_weapon_speed, self)
+	_set_loaded_rounds(active_weapon, 0)
+	active_weapon = &"fists"
+	_update_held_gun()
+	_update_movement_animation(Input.get_vector("move_left", "move_right", "move_up", "move_down"))
+
+
+func _update_held_gun() -> void:
+	_held_gun.visible = active_weapon in [&"shotgun", &"ak47"]
+	if active_weapon == &"shotgun":
+		_held_gun.texture = SHOTGUN_TEXTURE
+		_held_gun.scale = Vector2(0.05, 0.05)
+	elif active_weapon == &"ak47":
+		_held_gun.texture = AK47_TEXTURE
+		_held_gun.scale = Vector2(0.08, 0.08)
 
 
 func _punch_targeted_policeman() -> void:
@@ -323,16 +386,29 @@ func on_enemy_killed() -> void:
 
 
 
-func _reload_pistol() -> void:
-	if active_weapon != &"pistol":
+func _reload_active_weapon() -> void:
+	if active_weapon not in [&"pistol", &"shotgun", &"ak47"]:
 		return
-	if pistol_magazines <= 0:
-		return  # no magazines left
-	if pistol_bullet == MAX_PISTOL_BULLET:
-		return  # already full, don't waste a magazine
+	var retained := _get_reserve_magazines(active_weapon)
+	if retained <= 0:
+		return
+	_set_reserve_magazines(active_weapon, retained - 1)
+	_set_loaded_rounds(active_weapon, RangedWeapon.capacity(active_weapon))
 
-	pistol_magazines -= 1
-	pistol_bullet = MAX_PISTOL_BULLET
+
+func _get_reserve_magazines(weapon_type: StringName) -> int:
+	match weapon_type:
+		&"pistol": return pistol_magazines
+		&"shotgun": return shotgun_magazines
+		&"ak47": return ak47_magazines
+	return 0
+
+
+func _set_reserve_magazines(weapon_type: StringName, count: int) -> void:
+	match weapon_type:
+		&"pistol": pistol_magazines = count
+		&"shotgun": shotgun_magazines = count
+		&"ak47": ak47_magazines = count
 
 
 func _show_pickup_feedback(message: String) -> void:

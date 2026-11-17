@@ -24,6 +24,8 @@
 [ext_resource type="Script" uid="uid://caqtx4k3wooul" path="res://scripts/enemy_gun.gd" id="22_jscy8"]
 [ext_resource type="PackedScene" uid="uid://csng0lr4lecjm" path="res://scenes/PistolMagazine.tscn" id="22_pm3ni"]
 [ext_resource type="PackedScene" uid="uid://c7llhut3utob2" path="res://scenes/ShotgunMagazine.tscn" id="23_pm3ni"]
+[ext_resource type="Texture2D" path="res://assets/sprites/weapon/ak47.png" id="24_ak47"]
+[ext_resource type="Texture2D" path="res://assets/sprites/weapon/shotgun.png" id="25_shotgun"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_player"]
 animations = [{
@@ -261,6 +263,30 @@ shape = SubResource("CircleShape2D_pistol")
 texture_filter = 1
 scale = Vector2(0.05, 0.05)
 texture = ExtResource("13_pistol_pickup")
+
+[node name="Shotgun" type="Area2D" parent="Pickups" groups=["weapon_pickups"]]
+position = Vector2(1000, 225)
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("6_pickup")
+weapon_type = &"shotgun"
+
+[node name="Visual" type="Sprite2D" parent="Pickups/Shotgun"]
+texture_filter = 1
+scale = Vector2(0.05, 0.05)
+texture = ExtResource("25_shotgun")
+
+[node name="AK47" type="Area2D" parent="Pickups" groups=["weapon_pickups"]]
+position = Vector2(1400, 225)
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("6_pickup")
+weapon_type = &"ak47"
+
+[node name="Visual" type="Sprite2D" parent="Pickups/AK47"]
+texture_filter = 1
+scale = Vector2(0.05, 0.05)
+texture = ExtResource("24_ak47")
 
 [node name="Enemies" type="Node2D" parent="." unique_id=140466316]
 position = Vector2(663, 318)

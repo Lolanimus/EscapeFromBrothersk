@@ -146,9 +146,9 @@ The following Fibonacci estimates are provisional. No story exceeds 8 points; im
 
 ## Further Notes
 
-- The gunfire hearing radius remains undecided.
-- Pistol, shotgun, AK-47, and thrown-weapon projectile speeds remain undecided.
-- The AK-47 firing cadence and the player's firing cadences for all ranged weapons remain undecided.
+- Gunfire hearing defaults to 800 pixels, configurable per policeman; scene tests cover in/out of range and sound through walls.
+- Ranged projectile speed defaults to 1200 pixels per second for player and police; player weapon exports and police gun overrides allow tuning. Ranged weapon throws default to 800 pixels per second, configurable on the player.
+- Player firing cadence defaults to 0.25 seconds for pistol, 0.8 for shotgun, and 0.1 for AK-47. Police AK-47 cadence defaults to 0.1 seconds; police pistol/shotgun defaults remain 0.6/1.2 seconds. All are configurable.
 - The distribution of pistol-, shotgun-, and AK-47-armed police among the 21–30 policemen remains undecided.
 - The ranged weapons deliberately placed in the level and the distribution of their compatible guaranteed magazines remain undecided.
 - The result of swapping a carried ranged weapon, including what happens to its loaded magazine, remains undecided.
@@ -162,3 +162,7 @@ The following Fibonacci estimates are provisional. No story exceeds 8 points; im
 - The current gameplay scene contains only a basic player and one enemy rather than the required prison layout and population.
 - No project glossary or architectural decision record is present, so this specification uses terminology from the intent and existing scripts.
 - This specification is stored locally alongside the intent rather than published to an issue tracker, as requested.
+
+## Current delivery scope
+
+Stories 06, 13, and 14 are implemented. Story 18 currently implements ranged-weapon throwing only, as requested by the user. It uses the existing single active weapon and returns to fists on throwing; story 09 weapon slots/switching and story 17 katana combat remain deferred. The complete katana throw criterion in story 18 remains open. These deferrals do not change the full-demo requirements above.

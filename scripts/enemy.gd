@@ -26,6 +26,7 @@ const DEAD_COLOR := Color(0.2, 0.22, 0.26, 1.0)
 		stop_distance = maxf(value, 0.0)
 
 @export_node_path("CharacterBody2D") var target_path: NodePath = ^"../../Player"
+@export_range(0.0, 5000.0, 1.0) var gunfire_hearing_radius: float = 800.0
 
 # whenever the variable is @onready,
 # it gets initialized shen the node becomes ready
@@ -99,19 +100,18 @@ func _physics_process(delta: float) -> void:
 
 	var player_in_cone := _is_player_inside_cone()
 
-	# Red only while the player is inside the drawn cone.
-	if vision != null:
-		vision.set_alerted(player_in_cone)
-
-	# Point the gun at the player, and shoot only while he is in the cone.
-	if gun != null:
-		if target != null and (is_alerted or player_in_cone):
-			gun.aim_at(target.global_position)
-		gun.set_trigger(player_in_cone)
-
 	if target != null and not is_alerted and (player_in_cone if vision != null else _can_see_target()):
 		is_alerted = true
 		alerted.emit()
+
+	if vision != null:
+		vision.set_alerted(is_alerted)
+
+	# Detection needs the cone; an alerted policeman only needs a clear shot.
+	if gun != null:
+		if target != null and is_alerted:
+			gun.aim_at(target.global_position)
+		gun.set_trigger(target != null and is_alerted and _has_clear_shot())
 
 	# Chase while firing; losing sight does not cancel pursuit.
 	if target != null and is_alerted:
@@ -125,6 +125,15 @@ func _physics_process(delta: float) -> void:
 
 func take_player_projectile_hit() -> void:
 	kill_permanently()
+
+
+func hear_gunfire(origin: Vector2) -> void:
+	if life_state != &"living" or is_alerted or vision == null:
+		return
+	if global_position.distance_to(origin) > gunfire_hearing_radius:
+		return
+	# Hearing turns the cone; only the normal visual detection can alert police.
+	vision.global_rotation = (origin - vision.global_position).angle() + PI / 2.0
 
 
 func kill_permanently() -> void:
@@ -213,6 +222,13 @@ func _can_see_target() -> bool:
 
 	var result := get_world_2d().direct_space_state.intersect_ray(query)
 	return result.is_empty() or result.get("collider") == target
+
+
+func _has_clear_shot() -> bool:
+	var query := PhysicsRayQueryParameters2D.create(gun.global_position, target.global_position)
+	query.exclude = [get_rid(), target.get_rid()]
+	query.collision_mask = vision.vision_collision_mask if vision != null else 9
+	return get_world_2d().direct_space_state.intersect_ray(query).is_empty()
 
 
 func _is_player_inside_cone() -> bool:

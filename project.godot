@@ -66,6 +66,11 @@ reload={
 ]
 }
 
+throw_weapon={
+"deadzone": 0.5,
+"events": [Object(InputEventMouseButton,"button_index":2)]
+}
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

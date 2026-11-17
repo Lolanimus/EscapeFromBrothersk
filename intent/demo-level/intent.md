@@ -51,9 +51,9 @@ Use Godot 4.7 and GDScript. Use placeholder art rather than polished art. The de
 
 ## Open questions
 
-- What is the gunfire hearing radius?
-- What are the pistol, shotgun, AK-47, and thrown-weapon projectile speeds?
-- What are the AK-47 firing cadence and the player's firing cadences for all ranged weapons?
+- Selected gunfire hearing radius: 800 pixels by default, configurable per policeman.
+- Selected default speeds: 1200 pixels/second for ranged projectiles and 800 for ranged weapon throws; configurable.
+- Selected default player firing cadences: pistol 0.25 seconds, shotgun 0.8, AK-47 0.1. Police AK-47 cadence: 0.1 seconds; configurable.
 - How are the three police gun types distributed among the 21–30 policemen?
 - Which ranged weapons and compatible magazine types are deliberately placed in the level?
 - What happens to a carried ranged weapon and its loaded magazine when the player swaps to a different ranged weapon?

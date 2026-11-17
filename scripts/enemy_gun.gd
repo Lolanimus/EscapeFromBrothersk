@@ -5,14 +5,16 @@ extends Node2D
 ##   Sprite2D "Sprite" - the gun picture (Pistol.png)
 ##   Marker2D "Muzzle" - where bullets come out (place it at the barrel tip)
 
-const EnemyProjectileScene := preload("res://scenes/enemy_projectile.tscn")
+const WeaponBehavior := preload("res://scripts/ranged_weapon.gd")
 
-## Seconds between shots.
-@export_range(0.05, 10.0, 0.01) var fire_cadence: float = 1.0
+@export_enum("pistol", "shotgun", "ak47") var weapon_type: String = "pistol"
+
+## Seconds between shots; -1 uses the shared weapon cadence.
+@export_range(-1.0, 10.0, 0.01) var fire_cadence: float = -1.0
 ## Seconds to wait after the player enters the cone before the first shot.
 @export_range(0.0, 10.0, 0.01) var first_shot_delay: float = 0.0
-## Bullet speed in pixels per second.
-@export_range(0.0, 4000.0, 1.0) var projectile_speed: float = 900.0
+## Bullet speed in pixels per second; -1 uses the shared weapon speed.
+@export_range(-1.0, 4000.0, 1.0) var projectile_speed: float = -1.0
 ## How far in front of the gun bullets appear if there is no Muzzle node.
 @export_range(0.0, 200.0, 1.0) var muzzle_distance: float = 24.0
 ## Pistol.png has its barrel pointing left, so it gets flipped to point right.
@@ -51,18 +53,15 @@ func _physics_process(delta: float) -> void:
 	_cooldown = maxf(_cooldown - delta, 0.0)
 	if _trigger_held and is_zero_approx(_cooldown):
 		fire()
-		_cooldown = fire_cadence
+		_cooldown = fire_cadence if fire_cadence >= 0.0 else WeaponBehavior.police_cadence(StringName(weapon_type))
 
 
-## Fires one bullet in the direction the gun is pointing.
+## Fires one shared weapon shot in the direction the gun is pointing.
 func fire() -> void:
 	var shot_direction := Vector2.RIGHT.rotated(global_rotation)
 	var spawn_position := global_position + shot_direction * muzzle_distance
 	if muzzle != null:
 		spawn_position = muzzle.global_position
 
-	var projectile := EnemyProjectileScene.instantiate() as Area2D
-	get_tree().current_scene.add_child(projectile)
-	projectile.global_position = spawn_position
-	projectile.set("direction", shot_direction)
-	projectile.set("speed", projectile_speed)
+	var speed := projectile_speed if projectile_speed >= 0.0 else WeaponBehavior.projectile_speed(StringName(weapon_type))
+	WeaponBehavior.fire(get_tree().current_scene, StringName(weapon_type), spawn_position, shot_direction, speed, true)
