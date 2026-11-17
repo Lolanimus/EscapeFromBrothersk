@@ -155,7 +155,7 @@ The following Fibonacci estimates are provisional. No story exceeds 8 points; im
 - The result of attempting to collect a magazine when that magazine type is already at its four-magazine limit remains undecided.
 - The katana swing's exact reach, arc angle, and cadence remain undecided.
 - The katana's level placement remains undecided.
-- The scene loaded after Level Complete remains undecided.
+- Story 12 loads `res://scenes/next_level.tscn` by default, a placeholder for the next level. Each prison level can override the exported `next_level_scene` PackedScene. A fresh key press or mouse-button press continues; mouse motion, releases, and key echoes do not. Gameplay processing stops during Level Complete.
 - Exact room dimensions, geometry, and alternate-passage layout remain undecided.
 - The intent says the existing player collides with surroundings, while the current player implementation directly updates position and clamps it to the viewport. Environmental collision behavior must be verified before implementation relies on it.
 - The existing enemy implementation uses a distance check and ray test, not the required forward-facing cone or permanent alerted pathfinding behavior.

@@ -2,6 +2,15 @@ class_name PrisonLevel
 extends Node2D
 
 const AUTOMATIC_DOOR_SCRIPT := preload("res://scripts/automatic_door.gd")
+const EXIT_THRESHOLD := Rect2(1650, 825, 100, 100)
+
+@export var next_level_scene: PackedScene = preload("res://scenes/next_level.tscn")
+
+var exit_unlocked := false
+var level_complete := false
+var _exit_gate: StaticBody2D
+var _exit_status: Label
+var _transition_pending := false
 
 const AREA_RECTS: Dictionary = {
 	&"starting_cell": Rect2(100.0, 100.0, 250.0, 250.0),
@@ -93,6 +102,61 @@ func _ready() -> void:
 
 	var player := get_node("Player") as CharacterBody2D
 	player.position = Vector2(225.0, 225.0)
+	_add_wall("ExitGate", Rect2(1640.0, 825.0, 20.0, 100.0))
+	_exit_gate = _world.get_node("ExitGate")
+	_exit_status = Label.new()
+	_exit_status.name = "ExitStatus"
+	_exit_status.position = Vector2(1460.0, 940.0)
+	_exit_status.text = "EXIT LOCKED"
+	_world.add_child(_exit_status)
+
+
+func _physics_process(_delta: float) -> void:
+	if not exit_unlocked:
+		for policeman in get_tree().get_nodes_in_group("police"):
+			if is_ancestor_of(policeman) and policeman.life_state != &"dead":
+				return
+		exit_unlocked = true
+		_exit_status.text = "EXIT OPEN"
+		_exit_gate.visible = false
+		_exit_gate.get_node("CollisionShape2D").set_deferred("disabled", true)
+	var player := get_node("Player") as Player
+	if not level_complete and not player.is_dead and EXIT_THRESHOLD.has_point(player.global_position):
+		level_complete = true
+		for child in get_children():
+			child.process_mode = Node.PROCESS_MODE_DISABLED
+		var layer := CanvasLayer.new()
+		layer.name = "CompletionLayer"
+		layer.layer = 10
+		add_child(layer)
+		var overlay := ColorRect.new()
+		overlay.name = "LevelComplete"
+		overlay.color = Color(0.02, 0.04, 0.08, 0.9)
+		overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		layer.add_child(overlay)
+		var label := Label.new()
+		label.text = "LEVEL COMPLETE\nPress a key or click to continue"
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.add_theme_font_size_override("font_size", 32)
+		label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		overlay.add_child(label)
+
+
+func _input(event: InputEvent) -> void:
+	if not level_complete or _transition_pending or next_level_scene == null:
+		return
+	if (event is InputEventKey or event is InputEventMouseButton) and event.is_pressed() and not event.is_echo():
+		_transition_pending = true
+		get_viewport().set_input_as_handled()
+		call_deferred("_load_next_level")
+
+
+func _load_next_level() -> void:
+	var result := get_tree().change_scene_to_packed(next_level_scene)
+	if result != OK:
+		_transition_pending = false
+		push_error("Could not load configured next level: %s" % error_string(result))
 
 
 func _add_automatic_doors() -> void:
@@ -238,6 +302,7 @@ func _add_wall(wall_name: String, wall_rect: Rect2) -> void:
 	wall.position = wall_rect.get_center()
 
 	var collision := CollisionShape2D.new()
+	collision.name = "CollisionShape2D"
 	var shape := RectangleShape2D.new()
 	shape.size = wall_rect.size
 	collision.shape = shape
