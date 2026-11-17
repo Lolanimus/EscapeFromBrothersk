@@ -9,19 +9,21 @@
 [ext_resource type="Texture2D" uid="uid://dlqqwk5hnu0db" path="res://assets/sprites/main character/walking/1.png" id="7_walk_1"]
 [ext_resource type="Texture2D" uid="uid://cvkqde6to8ets" path="res://assets/sprites/main character/walking/2.png" id="8_walk_2"]
 [ext_resource type="Texture2D" uid="uid://bontarhs63b5p" path="res://assets/sprites/main character/walking/3.png" id="9_walk_3"]
-[ext_resource type="Texture2D" uid="uid://b4dsg84chhvva" path="res://assets/sprites/main character/walking/walkingAway/walkingAway1.png" id="10_walk_up_1"]
-[ext_resource type="Texture2D" uid="uid://1a1b4gj0vdrx" path="res://assets/sprites/main character/walking/walkingAway/walkingAway2.png" id="11_walk_up_2"]
-[ext_resource type="Texture2D" uid="uid://cv4vwem0bv0yu" path="res://assets/sprites/main character/walking/walkingAway/walkingAway3.png" id="12_walk_up_3"]
-[ext_resource type="Texture2D" uid="uid://udyxvxlpnq3t" path="res://assets/sprites/weapon/Pistol.png" id="13_pistol_pickup"]
-[ext_resource type="Texture2D" uid="uid://b27lbqofgb10x" path="res://assets/sprites/main character/attack/pistol1.png" id="14_pistol_side_1"]
-[ext_resource type="Texture2D" uid="uid://q3elsicej42i" path="res://assets/sprites/main character/attack/pistol2.png" id="15_pistol_side_2"]
-[ext_resource type="Texture2D" uid="uid://7u8hob43wnhg" path="res://assets/sprites/main character/attack/backsideAttack/backpistol1.png" id="16_pistol_up_1"]
-[ext_resource type="Texture2D" uid="uid://crbc0bwj22btm" path="res://assets/sprites/main character/attack/backsideAttack/backpistol2.png" id="17_pistol_up_2"]
+[ext_resource type="Texture2D" uid="uid://l4w1m4jqwtmd" path="res://assets/sprites/main character/walking/walkingAway/walkingAway1.png" id="10_walk_up_1"]
+[ext_resource type="Texture2D" uid="uid://b4pobc2pxt6lp" path="res://assets/sprites/main character/walking/walkingAway/walkingAway2.png" id="11_walk_up_2"]
+[ext_resource type="Texture2D" uid="uid://bspqe8q0kfg2s" path="res://assets/sprites/main character/walking/walkingAway/walkingAway3.png" id="12_walk_up_3"]
+[ext_resource type="Texture2D" uid="uid://dmtirfdj3n0d5" path="res://assets/sprites/weapon/Pistol.png" id="13_pistol_pickup"]
+[ext_resource type="Texture2D" uid="uid://d2i5cgnbfgi6q" path="res://assets/sprites/main character/attack/pistol1.png" id="14_pistol_side_1"]
+[ext_resource type="Texture2D" uid="uid://dki2jk7s72rdt" path="res://assets/sprites/main character/attack/pistol2.png" id="15_pistol_side_2"]
+[ext_resource type="Texture2D" uid="uid://c24jcq5070181" path="res://assets/sprites/main character/attack/backsideAttack/backpistol1.png" id="16_pistol_up_1"]
+[ext_resource type="Texture2D" uid="uid://be0crww7xo8j1" path="res://assets/sprites/main character/attack/backsideAttack/backpistol2.png" id="17_pistol_up_2"]
+[ext_resource type="PackedScene" uid="uid://bq7yjt5xu3va4" path="res://scenes/AK-47Magazine.tscn" id="17_y6deb"]
 [ext_resource type="Texture2D" uid="uid://rcu23fxywhgt" path="res://assets/sprites/main character/attack/1.png" id="18_fists_side"]
-[ext_resource type="Texture2D" uid="uid://dpqvdxubvsson" path="res://assets/sprites/main character/attack/backsideAttack/backpunch1.png" id="19_fists_up"]
+[ext_resource type="Texture2D" uid="uid://cpdxqm4gu5vti" path="res://assets/sprites/main character/attack/backsideAttack/backpunch1.png" id="19_fists_up"]
 [ext_resource type="Script" uid="uid://bkb4xi3qvdxdc" path="res://scenes/vision.gd" id="20_gqmmt"]
-[ext_resource type="Texture2D" uid="uid://ce5hxcb1ps12v" path="res://assets/sprites/Policeman/Policeman_side1.png" id="21_yc10j"]
 [ext_resource type="Script" uid="uid://caqtx4k3wooul" path="res://scripts/enemy_gun.gd" id="22_jscy8"]
+[ext_resource type="PackedScene" uid="uid://csng0lr4lecjm" path="res://scenes/PistolMagazine.tscn" id="22_pm3ni"]
+[ext_resource type="PackedScene" uid="uid://c7llhut3utob2" path="res://scenes/ShotgunMagazine.tscn" id="23_pm3ni"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_player"]
 animations = [{
@@ -195,19 +197,19 @@ script = ExtResource("4_camera")
 
 [node name="StatsLabel" type="Label" parent="Player/CanvasLayer" unique_id=834611085]
 offset_left = 2.0
-offset_top = 547.0
-offset_right = 230.0
+offset_top = 493.0
+offset_right = 207.0
 offset_bottom = 648.0
 
-[node name="MotivationBar" type="ProgressBar" parent="Player/CanvasLayer"]
+[node name="MotivationBar" type="ProgressBar" parent="Player/CanvasLayer" unique_id=1778046884]
 offset_left = 16.0
 offset_top = 16.0
 offset_right = 236.0
 offset_bottom = 40.0
-value = 100.0
 mouse_filter = 2
+value = 100.0
 
-[node name="ChokeLabel" type="Label" parent="Player/CanvasLayer"]
+[node name="ChokeLabel" type="Label" parent="Player/CanvasLayer" unique_id=540059954]
 visible = false
 offset_left = 420.0
 offset_top = 510.0
@@ -215,18 +217,17 @@ offset_right = 732.0
 offset_bottom = 536.0
 text = "CHOKING — hold left click"
 horizontal_alignment = 1
-mouse_filter = 2
 
-[node name="ChokeProgress" type="ProgressBar" parent="Player/CanvasLayer"]
+[node name="ChokeProgress" type="ProgressBar" parent="Player/CanvasLayer" unique_id=1337386729]
 visible = false
 offset_left = 436.0
 offset_top = 540.0
 offset_right = 716.0
 offset_bottom = 564.0
-max_value = 3.0
 mouse_filter = 2
+max_value = 3.0
 
-[node name="DeathNotice" type="Label" parent="Player/CanvasLayer"]
+[node name="DeathNotice" type="Label" parent="Player/CanvasLayer" unique_id=842220808]
 visible = false
 offset_left = 400.0
 offset_top = 260.0
@@ -235,9 +236,8 @@ offset_bottom = 340.0
 theme_override_font_sizes/font_size = 42
 text = "YOU DIED"
 horizontal_alignment = 1
-mouse_filter = 2
 
-[node name="RestartButton" type="Button" parent="Player/CanvasLayer"]
+[node name="RestartButton" type="Button" parent="Player/CanvasLayer" unique_id=1201273970]
 visible = false
 offset_left = 466.0
 offset_top = 352.0
@@ -272,16 +272,17 @@ collision_mask = 9
 script = ExtResource("3_enemy")
 stop_distance = 40.0
 
-[node name="PoliceVisual" type="Polygon2D" parent="Enemies/Enemy1"]
-polygon = PackedVector2Array(-12, -18, 12, -18, 18, -10, 18, 10, 12, 18, -12, 18, -18, 10, -18, -10)
+[node name="PoliceVisual" type="Polygon2D" parent="Enemies/Enemy1" unique_id=703063553]
 color = Color(0.85, 0.12, 0.2, 1)
+polygon = PackedVector2Array(-12, -18, 12, -18, 18, -10, 18, 10, 12, 18, -12, 18, -18, 10, -18, -10)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Enemies/Enemy1" unique_id=907117504]
 position = Vector2(-2, 3)
 shape = SubResource("RectangleShape2D_2urpc")
 debug_color = Color(0.9014307, 0, 0.21367055, 0.41960785)
 
-[node name="RecoveryWarning" type="Label" parent="Enemies/Enemy1"]
+[node name="RecoveryWarning" type="Label" parent="Enemies/Enemy1" unique_id=250530024]
+visible = false
 offset_left = -46.0
 offset_top = -48.0
 offset_right = 70.0
@@ -289,14 +290,12 @@ offset_bottom = -24.0
 theme_override_colors/font_color = Color(1, 0.72, 0.2, 1)
 theme_override_font_sizes/font_size = 14
 text = "RECOVERING!"
-visible = false
 
 [node name="Vision" type="Node2D" parent="Enemies/Enemy1" unique_id=1183385143]
 position = Vector2(-6, 2)
 script = ExtResource("20_gqmmt")
 
 [node name="Gun" type="Node2D" parent="Enemies/Enemy1" unique_id=1323120871]
-position = Vector2(0, 0)
 script = ExtResource("22_jscy8")
 
 [node name="Sprite" type="Sprite2D" parent="Enemies/Enemy1/Gun" unique_id=403238186]
@@ -304,3 +303,12 @@ texture_filter = 1
 position = Vector2(22, 0)
 scale = Vector2(0.05, 0.05)
 texture = ExtResource("13_pistol_pickup")
+
+[node name="PistolMagazine" parent="." unique_id=530601454 instance=ExtResource("22_pm3ni")]
+position = Vector2(759, 219)
+
+[node name="ShotgunMagazine" parent="." unique_id=1834132646 instance=ExtResource("23_pm3ni")]
+position = Vector2(388, 391)
+
+[node name="AK-47Magazine" parent="." unique_id=32270923 instance=ExtResource("17_y6deb")]
+position = Vector2(969, 521)

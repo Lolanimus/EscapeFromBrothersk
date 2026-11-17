@@ -30,13 +30,17 @@ var _choke_elapsed := 0.0
 var _choke_requires_release := false
 var is_dead := false
 var motivation := 100
-var pistol_magazines = 3
+var pistol_magazines = 0
 var pistol_bullet = 12
 
 const MAX_MAG = 3
 const MAX_PISTOL_BULLET = 12
 const MAX_MOTIVATION = 100
 
+var shotgun_magazines: int = 0
+var ak47_magazines: int = 0
+
+const MAX_MAGAZINES_PER_WEAPON := 4
 
 
 @onready var aim_pivot: Node2D = $AimPivot
@@ -50,11 +54,21 @@ func _process(_delta: float) -> void:
 	$CanvasLayer/ChokeProgress.visible = _choke_elapsed > 0.0
 	$CanvasLayer/ChokeLabel.visible = _choke_elapsed > 0.0
 	stats_label.text = "motivation: %d/%d" % [motivation, MAX_MOTIVATION]
+	#test
+	stats_label.text += "\nShotgun magazines: " + str(shotgun_magazines)
+	stats_label.text += "\nAK-47 magazines: " + str(ak47_magazines)
+	
+	
 	if active_weapon == &"pistol":
-		stats_label.text += "\nbullets: %d/%d\nMagazines: %d/%d" % [
-			pistol_bullet, MAX_PISTOL_BULLET,
-			pistol_magazines, MAX_MAG,
+		stats_label.text += "\nPistol magazines: %d/%d" % [
+			pistol_magazines,
+			MAX_MAG
 		]
+		stats_label.text += "\nPistol bullets: %d/%d" % [
+			pistol_bullet,
+			MAX_PISTOL_BULLET
+		]
+		
 
 
 func _ready() -> void:
@@ -91,6 +105,7 @@ func _physics_process(delta: float) -> void:
 	_pistol_cooldown_remaining = maxf(_pistol_cooldown_remaining - delta, 0.0)
 	if Input.is_action_just_pressed("interact"):
 		_acquire_nearest_weapon()
+		_collect_nearest_magazine()
 	if (
 		Input.is_action_just_pressed("shoot")
 		and active_weapon == &"pistol"
@@ -158,6 +173,8 @@ func _show_stationary_pose() -> void:
 	skin.frame = 0
 
 
+
+
 func _acquire_nearest_weapon() -> void:
 	var nearest_pickup: Node2D = null
 	var nearest_distance := interaction_distance
@@ -178,6 +195,47 @@ func _acquire_nearest_weapon() -> void:
 	_update_movement_animation(
 		Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	)
+	
+func _collect_nearest_magazine() -> void:
+	var nearest: Node2D = null
+	var nearest_distance := interaction_distance
+
+	for candidate in get_tree().get_nodes_in_group("magazine_pickups"):
+		var pickup := candidate as MagazinePickup
+
+		if pickup == null:
+			continue
+
+		var distance := global_position.distance_to(
+			pickup.global_position
+		)
+
+		if distance <= nearest_distance:
+			nearest = pickup
+			nearest_distance = distance
+
+	if nearest == null:
+		return
+
+	match nearest.weapon_type:
+		"pistol":
+			if active_weapon == &"pistol" and pistol_bullet == -1:
+				pistol_bullet = MAX_PISTOL_BULLET
+			else:
+				if pistol_magazines >= MAX_MAGAZINES_PER_WEAPON - 1:
+					return
+			pistol_magazines += 1
+		"shotgun":
+			if shotgun_magazines >= MAX_MAGAZINES_PER_WEAPON - 1:
+				return
+			shotgun_magazines += 1
+		"ak47":
+			if ak47_magazines >= MAX_MAGAZINES_PER_WEAPON - 1:
+				return
+			ak47_magazines += 1
+			
+	_show_pickup_feedback("Magazine collected!")
+	nearest.queue_free()
 
 
 func _fire_pistol() -> void:
@@ -276,6 +334,19 @@ func _reload_pistol() -> void:
 	pistol_magazines -= 1
 	pistol_bullet = MAX_PISTOL_BULLET
 
+
+func _show_pickup_feedback(message: String) -> void:
+	var layer := CanvasLayer.new()
+	get_tree().root.add_child(layer)
+
+	var label := Label.new()
+	label.text = message
+	label.position = Vector2(24, 24)
+	layer.add_child(label)
+
+	var tween := create_tween()
+	tween.tween_interval(1.5)
+	tween.tween_callback(layer.queue_free)
 
 func _update_choke(delta: float) -> bool:
 	if active_weapon != &"fists" or not Input.is_action_pressed("shoot"):

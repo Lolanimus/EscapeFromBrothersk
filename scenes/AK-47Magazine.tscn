@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://bq7yjt5xu3va4"]
+
+[ext_resource type="Script" uid="uid://cbyuj3mvbws7e" path="res://scripts/MagazinePickup.gd" id="1_cb3de"]
+[ext_resource type="Texture2D" uid="uid://c1do0mae7kbul" path="res://assets/sprites/bullets/bullet.png" id="2_p7r1d"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_orua6"]
+
+[node name="AK-47Magazine" type="Node2D" unique_id=32270923]
+
+[node name="Area2D" type="Area2D" parent="." unique_id=976586281]
+script = ExtResource("1_cb3de")
+weapon_type = "ak47"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=236842083]
+shape = SubResource("CapsuleShape2D_orua6")
+
+[node name="Label" type="Label" parent="Area2D" unique_id=735149812]
+offset_left = -35.0
+offset_top = -10.0
+offset_right = 76.0
+offset_bottom = 13.0
+text = "AK-47 Ammunition"
+
+[node name="Sprite2D" type="Sprite2D" parent="Area2D" unique_id=1314902347]
+scale = Vector2(0.02, 0.02)
+texture = ExtResource("2_p7r1d")
