@@ -108,6 +108,7 @@ func _input(event: InputEvent) -> void:
 	var player_viewport_position: Vector2 = get_global_transform_with_canvas() * Vector2.ZERO
 	var cursor_direction := mouse_motion.position - player_viewport_position
 	aim_pivot.global_rotation = cursor_direction.angle()
+	_held_gun.flip_v = cursor_direction.x < 0.0
 	if cursor_direction.y < 0.0 and absf(cursor_direction.y) >= absf(cursor_direction.x):
 		_last_facing = &"up"
 	else:
