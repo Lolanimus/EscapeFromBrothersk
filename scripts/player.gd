@@ -481,5 +481,6 @@ func _can_choke(candidate: Enemy) -> bool:
 func _restart_level() -> void:
 	if not is_dead:
 		return
+
 	$CanvasLayer/RestartButton.disabled = true
 	get_tree().call_deferred("reload_current_scene")
