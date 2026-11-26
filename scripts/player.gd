@@ -29,7 +29,7 @@ const CHOKE_DISTANCE := 64.0
 
 var active_weapon: StringName = &"fists"
 var _pistol_cooldown_remaining := 0.0
-var _pistol_animation_playing := false
+var _attack_animation_playing := false
 var _last_facing: StringName = &"side"
 var _last_side_faces_right := false
 
@@ -114,7 +114,7 @@ func _input(event: InputEvent) -> void:
 	else:
 		_last_facing = &"side"
 		_last_side_faces_right = cursor_direction.x > 0.0
-	if velocity.is_zero_approx() and not _pistol_animation_playing:
+	if velocity.is_zero_approx() and not _attack_animation_playing:
 		_show_stationary_pose()
 
 
@@ -161,7 +161,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _update_movement_animation(direction: Vector2) -> void:
-	if _pistol_animation_playing:
+	if _attack_animation_playing:
 		return
 
 	if direction.y < 0.0 and absf(direction.y) >= absf(direction.x):
@@ -285,13 +285,7 @@ func _collect_nearest_magazine() -> void:
 
 func _fire_pistol() -> void:
 	var shot_direction := Vector2.RIGHT.rotated(aim_pivot.global_rotation)
-	var aims_up := shot_direction.y < 0.0 and absf(shot_direction.y) >= absf(shot_direction.x)
-	var fire_animation: StringName = &"fire_pistol_up" if aims_up else &"fire_pistol_side"
-	_pistol_animation_playing = true
-	skin.scale = ACTION_SPRITE_SCALE
-	skin.position = SKIN_BASE_POSITION
-	skin.flip_h = not aims_up and shot_direction.x > 0.0
-	skin.play(fire_animation)
+	var aims_up := _play_attack_animation(&"fire_pistol_side", &"fire_pistol_up")
 	if aims_up:
 		muzzle.position = REAR_MUZZLE_OFFSET
 	else:
@@ -343,7 +337,21 @@ func _update_held_gun() -> void:
 		_held_gun.scale = Vector2(0.08, 0.08)
 
 
+# Plays a one-shot attack sequence facing the aim direction; returns whether it faced up.
+func _play_attack_animation(side_animation: StringName, up_animation: StringName) -> bool:
+	var attack_direction := Vector2.RIGHT.rotated(aim_pivot.global_rotation)
+	var aims_up := attack_direction.y < 0.0 and absf(attack_direction.y) >= absf(attack_direction.x)
+	_attack_animation_playing = true
+	skin.scale = ACTION_SPRITE_SCALE
+	skin.position = SKIN_BASE_POSITION
+	skin.flip_h = not aims_up and attack_direction.x > 0.0
+	skin.play(up_animation if aims_up else side_animation)
+	skin.frame = 0
+	return aims_up
+
+
 func _punch_targeted_policeman() -> void:
+	_play_attack_animation(&"punch_side", &"punch_up")
 	var attack_direction := Vector2.RIGHT.rotated(aim_pivot.global_rotation)
 	var target: Node2D = null
 	var closest_distance := 64.0
@@ -365,10 +373,10 @@ func _punch_targeted_policeman() -> void:
 
 
 func _on_skin_animation_finished() -> void:
-	if skin.animation != &"fire_pistol_side" and skin.animation != &"fire_pistol_up":
+	if skin.animation not in [&"fire_pistol_side", &"fire_pistol_up", &"punch_side", &"punch_up"]:
 		return
 
-	_pistol_animation_playing = false
+	_attack_animation_playing = false
 	_update_movement_animation(
 		Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	)

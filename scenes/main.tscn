@@ -20,6 +20,10 @@
 [ext_resource type="PackedScene" uid="uid://bq7yjt5xu3va4" path="res://scenes/AK-47Magazine.tscn" id="17_y6deb"]
 [ext_resource type="Texture2D" uid="uid://rcu23fxywhgt" path="res://assets/sprites/main character/attack/1.png" id="18_fists_side"]
 [ext_resource type="Texture2D" uid="uid://cpdxqm4gu5vti" path="res://assets/sprites/main character/attack/backsideAttack/backpunch1.png" id="19_fists_up"]
+[ext_resource type="Texture2D" uid="uid://ds67nlnbcrq4" path="res://assets/sprites/main character/attack/2.png" id="26_punch_side_2"]
+[ext_resource type="Texture2D" uid="uid://cugji03v5kofa" path="res://assets/sprites/main character/attack/3.png" id="27_punch_side_3"]
+[ext_resource type="Texture2D" uid="uid://c3nbyi3efcf12" path="res://assets/sprites/main character/attack/backsideAttack/backpunch2.png" id="28_punch_up_2"]
+[ext_resource type="Texture2D" uid="uid://cn8it4ha0ynab" path="res://assets/sprites/main character/attack/backsideAttack/backpunch3.png" id="29_punch_up_3"]
 [ext_resource type="Script" uid="uid://bkb4xi3qvdxdc" path="res://scenes/vision.gd" id="20_gqmmt"]
 [ext_resource type="Script" uid="uid://caqtx4k3wooul" path="res://scripts/enemy_gun.gd" id="22_jscy8"]
 [ext_resource type="PackedScene" uid="uid://csng0lr4lecjm" path="res://scenes/PistolMagazine.tscn" id="22_pm3ni"]
@@ -90,6 +94,34 @@ animations = [{
 "loop": 0,
 "name": &"idle_pistol_up",
 "speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("18_fists_side")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_punch_side_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_punch_side_3")
+}],
+"loop": 0,
+"name": &"punch_side",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("19_fists_up")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_punch_up_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("29_punch_up_3")
+}],
+"loop": 0,
+"name": &"punch_up",
+"speed": 12.0
 }, {
 "frames": [{
 "duration": 1.0,
