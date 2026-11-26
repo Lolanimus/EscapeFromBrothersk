@@ -28,6 +28,10 @@ const CHOKE_DISTANCE := 64.0
 @export_range(0.0, 4000.0, 1.0) var thrown_weapon_speed: float = 800.0
 
 var active_weapon: StringName = &"fists"
+## The one carried gun (&"" when none); fists are always available besides it.
+var carried_ranged_weapon: StringName = &""
+## The one carried melee weapon (&"katana"), or &"" so fists fill the melee side.
+var carried_melee_weapon: StringName = &""
 var _pistol_cooldown_remaining := 0.0
 var _pistol_animation_playing := false
 var _last_facing: StringName = &"side"
@@ -131,6 +135,8 @@ func _physics_process(delta: float) -> void:
 		_collect_nearest_magazine()
 	if Input.is_action_just_pressed("throw_weapon"):
 		_throw_active_weapon()
+	if Input.is_action_just_pressed("switch_weapon"):
+		_switch_weapon()
 	if (
 		(Input.is_action_pressed("shoot") if active_weapon == &"ak47" else Input.is_action_just_pressed("shoot"))
 		and active_weapon in [&"pistol", &"shotgun", &"ak47"]
@@ -225,12 +231,17 @@ func _acquire_nearest_weapon() -> void:
 
 	var incoming_type := StringName(nearest_pickup.get("weapon_type"))
 	var rounds := int(nearest_pickup.get("loaded_rounds"))
-	if incoming_type == active_weapon:
+	if incoming_type == &"katana":
+		_acquire_katana(nearest_pickup)
+		return
+	if incoming_type == carried_ranged_weapon:
 		_collect_duplicate_magazine(nearest_pickup)
 		return
 	if rounds != 0 and _get_reserve_magazines(incoming_type) >= MAX_MAGAZINES_PER_WEAPON:
 		return
+	_drop_carried_ranged_weapon()
 	active_weapon = incoming_type
+	carried_ranged_weapon = incoming_type
 	_set_loaded_rounds(active_weapon, rounds if rounds >= 0 else RangedWeapon.capacity(active_weapon))
 	_update_held_gun()
 	nearest_pickup.queue_free()
@@ -239,15 +250,48 @@ func _acquire_nearest_weapon() -> void:
 	)
 
 
+# The katana fills the melee slot without touching the carried gun; only one katana exists.
+func _acquire_katana(pickup: Node2D) -> void:
+	if carried_melee_weapon == &"katana":
+		return
+	carried_melee_weapon = &"katana"
+	active_weapon = &"katana"
+	pickup.queue_free()
+	_update_held_gun()
+	_update_movement_animation(Input.get_vector("move_left", "move_right", "move_up", "move_down"))
+
+
+# Fists are the melee side of the loadout whenever no katana is carried.
+func _melee_weapon() -> StringName:
+	return carried_melee_weapon if carried_melee_weapon != &"" else &"fists"
+
+
+# Swap rule: the replaced gun is left at the player's feet with exactly its loaded rounds,
+# while retained magazines stay with the player, so no ammunition is created or destroyed.
+func _drop_carried_ranged_weapon() -> void:
+	if carried_ranged_weapon == &"":
+		return
+	var dropped := ThrownWeaponScript.new()
+	dropped.weapon_type = carried_ranged_weapon
+	dropped.loaded_rounds = _get_loaded_rounds_of(carried_ranged_weapon)
+	dropped.position = global_position
+	dropped.add_to_group("weapon_pickups")
+	# Interaction runs in a physics callback, where adding an Area2D directly is not allowed.
+	get_tree().current_scene.add_child.call_deferred(dropped)
+	_set_loaded_rounds(carried_ranged_weapon, 0)
+	carried_ranged_weapon = &""
+
+
 # A duplicate of the carried gun only gives up its full magazine; the gun itself stays on the floor.
 func _collect_duplicate_magazine(pickup: Node2D) -> void:
 	var rounds := int(pickup.get("loaded_rounds"))
-	if rounds >= 0 and rounds != RangedWeapon.capacity(active_weapon):
+	var carried := carried_ranged_weapon
+	if rounds >= 0 and rounds != RangedWeapon.capacity(carried):
 		return
-	var loaded_magazines := 1 if get_loaded_rounds() > 0 else 0
-	if _get_reserve_magazines(active_weapon) + loaded_magazines >= MAX_MAGAZINES_PER_WEAPON:
+	var loaded_magazines := 1 if _get_loaded_rounds_of(carried) > 0 else 0
+	if _get_reserve_magazines(carried) + loaded_magazines >= MAX_MAGAZINES_PER_WEAPON:
 		return
-	_set_reserve_magazines(active_weapon, _get_reserve_magazines(active_weapon) + 1)
+	_set_reserve_magazines(carried, _get_reserve_magazines(carried) + 1)
 	pickup.set("loaded_rounds", 0)
 	_show_pickup_feedback("Magazine collected!")
 
@@ -274,7 +318,7 @@ func _collect_nearest_magazine() -> void:
 		return
 
 	var weapon_type := StringName(nearest.weapon_type)
-	var loaded_magazines := 1 if active_weapon == weapon_type and get_loaded_rounds() > 0 else 0
+	var loaded_magazines := 1 if carried_ranged_weapon == weapon_type and _get_loaded_rounds_of(weapon_type) > 0 else 0
 	if _get_reserve_magazines(weapon_type) + loaded_magazines >= MAX_MAGAZINES_PER_WEAPON:
 		return
 	_set_reserve_magazines(weapon_type, _get_reserve_magazines(weapon_type) + 1)
@@ -304,7 +348,11 @@ func _fire_pistol() -> void:
 
 
 func get_loaded_rounds() -> int:
-	match active_weapon:
+	return _get_loaded_rounds_of(active_weapon)
+
+
+func _get_loaded_rounds_of(weapon_type: StringName) -> int:
+	match weapon_type:
 		&"pistol": return pistol_bullet
 		&"shotgun": return shotgun_bullet
 		&"ak47": return ak47_bullet
@@ -328,7 +376,17 @@ func _throw_active_weapon() -> void:
 	thrown.global_position = global_position
 	thrown.launch(Vector2.RIGHT.rotated(aim_pivot.global_rotation), thrown_weapon_speed, self)
 	_set_loaded_rounds(active_weapon, 0)
-	active_weapon = &"fists"
+	carried_ranged_weapon = &""
+	active_weapon = _melee_weapon()
+	_update_held_gun()
+	_update_movement_animation(Input.get_vector("move_left", "move_right", "move_up", "move_down"))
+
+
+# Q toggles between the carried gun and the melee side of the loadout.
+func _switch_weapon() -> void:
+	if carried_ranged_weapon == &"":
+		return
+	active_weapon = _melee_weapon() if active_weapon == carried_ranged_weapon else carried_ranged_weapon
 	_update_held_gun()
 	_update_movement_animation(Input.get_vector("move_left", "move_right", "move_up", "move_down"))
 

@@ -115,7 +115,7 @@ The following Fibonacci estimates are provisional. No story exceeds 8 points; im
 - Magazine tests verify incompatible magazine types, full-magazine pickups, the capacities of 12, 6, and 31, retention for unequipped weapons, the four-magazine limit including the loaded magazine, destructive reloads, empty-magazine destruction, and HUD counts.
 - Level-supply tests verify that guaranteed placed magazines provide at least the required 20% ammunition surplus after rounding to whole magazines, without counting police drops.
 - Loot tests verify that every permanently killed policeman drops his gun with one full compatible magazine and that interacting with a duplicate carried weapon collects its magazine when capacity permits.
-- Loadout tests verify the one-melee and one-ranged limits, Q switching, replacement behavior once the unresolved swap rule is decided, and fallback to fists.
+- Loadout tests verify the one-melee and one-ranged limits, Q switching, the selected ranged swap rule, and fallback to fists.
 - Melee tests verify fist knockdown, 15-second recovery, the final 3-second warning, shooting a downed policeman, the uninterrupted three-second choke, choke cancellation, katana area kills, wall-blocked swings, and lethal katana throws.
 - Motivation tests verify the 100-point maximum, 25-point damage events, 10-point restoration after permanent kills, the 100-point restoration cap, and death at zero.
 - Checkpoint tests verify that death and Backspace restore every captured system to the level-start state and complete in under one second.
@@ -151,7 +151,7 @@ The following Fibonacci estimates are provisional. No story exceeds 8 points; im
 - Player firing cadence defaults to 0.25 seconds for pistol, 0.8 for shotgun, and 0.1 for AK-47. Police AK-47 cadence defaults to 0.1 seconds; police pistol/shotgun defaults remain 0.6/1.2 seconds. All are configurable.
 - The demo prison holds 24 policemen: 13 pistol, 7 shotgun, and 4 AK-47 users (story 16).
 - The pistol, shotgun, and AK-47 are deliberately placed. Placed full magazines are 3 pistol (36 rounds), 5 shotgun (30 blasts), and 1 AK-47 (31 bullets), each covering 24 one-hit kills plus 20% (29 rounds) after rounding up to whole magazines (story 16).
-- The result of swapping a carried ranged weapon, including what happens to its loaded magazine, remains undecided.
+- Selected ranged swap rule (story 09): when E acquires a different ranged weapon, the replaced gun is dropped at the player's position as a weapon pickup that keeps exactly its loaded rounds, as a thrown gun does, and the player keeps all retained magazines. No ammunition is created or destroyed. A swap that would push the incoming type past four magazines is refused and the carried gun is kept.
 - The result of attempting to collect a magazine when that magazine type is already at its four-magazine limit remains undecided.
 - The katana swing's exact reach, arc angle, and cadence remain undecided.
 - The katana's level placement remains undecided.
@@ -165,4 +165,4 @@ The following Fibonacci estimates are provisional. No story exceeds 8 points; im
 
 ## Current delivery scope
 
-Stories 06, 13, and 14 are implemented. Story 18 currently implements ranged-weapon throwing only, as requested by the user. It uses the existing single active weapon and returns to fists on throwing; story 09 weapon slots/switching and story 17 katana combat remain deferred. The complete katana throw criterion in story 18 remains open. These deferrals do not change the full-demo requirements above.
+Stories 06, 13, and 14 are implemented. Story 09 implements the carried loadout: one ranged slot, one melee slot that holds the katana or falls back to fists, Q switching, and the selected ranged swap rule. Story 18 currently implements ranged-weapon throwing only, as requested by the user; throwing the carried gun falls back to the melee side of the loadout. Story 17 katana combat remains deferred. The complete katana throw criterion in story 18 remains open. These deferrals do not change the full-demo requirements above.

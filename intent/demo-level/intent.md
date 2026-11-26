@@ -56,7 +56,7 @@ Use Godot 4.7 and GDScript. Use placeholder art rather than polished art. The de
 - Selected default player firing cadences: pistol 0.25 seconds, shotgun 0.8, AK-47 0.1. Police AK-47 cadence: 0.1 seconds; configurable.
 - How are the three police gun types distributed among the 21–30 policemen?
 - Which ranged weapons and compatible magazine types are deliberately placed in the level?
-- What happens to a carried ranged weapon and its loaded magazine when the player swaps to a different ranged weapon?
+- Selected ranged swap rule (story 09): the replaced gun drops at the player's position keeping exactly its loaded rounds; retained magazines stay with the player.
 - What happens when the player tries to collect a magazine type already at the four-magazine limit?
 - What are the katana swing's exact reach, arc angle, and cadence?
 - Where is the katana placed in the level?
