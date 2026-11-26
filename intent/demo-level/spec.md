@@ -149,8 +149,8 @@ The following Fibonacci estimates are provisional. No story exceeds 8 points; im
 - Gunfire hearing defaults to 800 pixels, configurable per policeman; scene tests cover in/out of range and sound through walls.
 - Ranged projectile speed defaults to 1200 pixels per second for player and police; player weapon exports and police gun overrides allow tuning. Ranged weapon throws default to 800 pixels per second, configurable on the player.
 - Player firing cadence defaults to 0.25 seconds for pistol, 0.8 for shotgun, and 0.1 for AK-47. Police AK-47 cadence defaults to 0.1 seconds; police pistol/shotgun defaults remain 0.6/1.2 seconds. All are configurable.
-- The distribution of pistol-, shotgun-, and AK-47-armed police among the 21–30 policemen remains undecided.
-- The ranged weapons deliberately placed in the level and the distribution of their compatible guaranteed magazines remain undecided.
+- The demo prison holds 24 policemen: 13 pistol, 7 shotgun, and 4 AK-47 users (story 16).
+- The pistol, shotgun, and AK-47 are deliberately placed. Placed full magazines are 3 pistol (36 rounds), 5 shotgun (30 blasts), and 1 AK-47 (31 bullets), each covering 24 one-hit kills plus 20% (29 rounds) after rounding up to whole magazines (story 16).
 - The result of swapping a carried ranged weapon, including what happens to its loaded magazine, remains undecided.
 - The result of attempting to collect a magazine when that magazine type is already at its four-magazine limit remains undecided.
 - The katana swing's exact reach, arc angle, and cadence remain undecided.

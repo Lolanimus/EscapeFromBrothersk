@@ -21,6 +21,12 @@ func _run() -> void:
 		quit(failures)
 		return
 	check(sign.text == "EXIT LOCKED", "living police lock the exit")
+	var roster_size := _police(level).size()
+	_kill_police_except(level, police)
+	await physics_frame
+	await physics_frame
+	check(roster_size > 1 and sign.text == "EXIT LOCKED",
+		"killing all %d other posted policemen leaves the exit locked while Enemy1 lives" % (roster_size - 1))
 	var player := level.get_node("Player") as Player
 	player.global_position = Vector2(1600, 875)
 	Input.action_press("move_right")
@@ -75,7 +81,7 @@ func _run() -> void:
 	root.add_child(level)
 	current_scene = level
 	await process_frame
-	level.get_node("Enemies/Enemy1").kill_permanently()
+	_kill_police_except(level, null)
 	level.get_node("Player").global_position = Vector2(1680, 875)
 	for frame in range(4):
 		await physics_frame
@@ -94,7 +100,7 @@ func _run() -> void:
 	root.add_child(level)
 	current_scene = level
 	await process_frame
-	level.get_node("Enemies/Enemy1").kill_permanently()
+	_kill_police_except(level, null)
 	player = level.get_node("Player") as Player
 	for hit in range(4):
 		player.take_police_projectile_hit()
@@ -106,6 +112,19 @@ func _run() -> void:
 	level.queue_free()
 	await process_frame
 	quit(failures)
+
+func _police(level: Node) -> Array[Enemy]:
+	var police: Array[Enemy] = []
+	for policeman in get_nodes_in_group("police"):
+		if level.is_ancestor_of(policeman):
+			police.append(policeman as Enemy)
+	return police
+
+## Permanently kills every policeman in the level except `survivor` (if any).
+func _kill_police_except(level: Node, survivor: Enemy) -> void:
+	for policeman in _police(level):
+		if policeman != survivor:
+			policeman.kill_permanently()
 
 func check(ok: bool, message: String) -> void:
 	if ok:

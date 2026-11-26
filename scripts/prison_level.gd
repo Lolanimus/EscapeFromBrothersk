@@ -45,6 +45,37 @@ const AREA_NODE_IDS: Dictionary = {
 	&"alternate_passage": [7, 106, 107],
 }
 
+## Story 16 police roster: 24 policemen (13 pistol, 7 shotgun, 4 AK-47).
+## Enemies/Enemy1 (pistol, cell block at 673,490) is placed in main.tscn; the
+## other 23 are copies of it posted here. "facing" is the vision cone rotation
+## in degrees (0 = up, 90 = right, 180 = down, -90 = left). The starting cell
+## stays empty so the player always begins unseen.
+const POLICE_POSTS: Array[Dictionary] = [
+	{"name": "CellBlockPolice2", "position": Vector2(480.0, 150.0), "weapon": "pistol", "facing": 180.0},
+	{"name": "CellBlockPolice3", "position": Vector2(780.0, 330.0), "weapon": "pistol", "facing": -90.0},
+	{"name": "CellBlockPolice4", "position": Vector2(480.0, 500.0), "weapon": "shotgun", "facing": 0.0},
+	{"name": "GuardOfficePolice1", "position": Vector2(950.0, 150.0), "weapon": "pistol", "facing": 180.0},
+	{"name": "GuardOfficePolice2", "position": Vector2(1180.0, 320.0), "weapon": "pistol", "facing": -90.0},
+	{"name": "GuardOfficePolice3", "position": Vector2(920.0, 340.0), "weapon": "ak47", "facing": 90.0},
+	{"name": "StoragePolice1", "position": Vector2(1580.0, 150.0), "weapon": "shotgun", "facing": -90.0},
+	{"name": "StoragePolice2", "position": Vector2(1330.0, 330.0), "weapon": "pistol", "facing": 0.0},
+	{"name": "StoragePolice3", "position": Vector2(1590.0, 250.0), "weapon": "ak47", "facing": -90.0},
+	{"name": "CorridorPolice1", "position": Vector2(1250.0, 450.0), "weapon": "pistol", "facing": -90.0},
+	{"name": "CorridorPolice2", "position": Vector2(1400.0, 550.0), "weapon": "shotgun", "facing": -90.0},
+	{"name": "CorridorPolice3", "position": Vector2(1600.0, 470.0), "weapon": "pistol", "facing": -90.0},
+	{"name": "YardPolice1", "position": Vector2(950.0, 800.0), "weapon": "pistol", "facing": -90.0},
+	{"name": "YardPolice2", "position": Vector2(1150.0, 700.0), "weapon": "shotgun", "facing": 0.0},
+	{"name": "YardPolice3", "position": Vector2(1300.0, 950.0), "weapon": "ak47", "facing": -90.0},
+	{"name": "YardPolice4", "position": Vector2(1000.0, 1000.0), "weapon": "pistol", "facing": 0.0},
+	{"name": "YardPolice5", "position": Vector2(1350.0, 700.0), "weapon": "pistol", "facing": 180.0},
+	{"name": "YardPolice6", "position": Vector2(1200.0, 1040.0), "weapon": "shotgun", "facing": 0.0},
+	{"name": "ExitPolice1", "position": Vector2(1560.0, 740.0), "weapon": "shotgun", "facing": 180.0},
+	{"name": "ExitPolice2", "position": Vector2(1500.0, 1000.0), "weapon": "pistol", "facing": 0.0},
+	{"name": "ExitPolice3", "position": Vector2(1580.0, 1040.0), "weapon": "ak47", "facing": 0.0},
+	{"name": "PassagePolice1", "position": Vector2(450.0, 700.0), "weapon": "shotgun", "facing": 90.0},
+	{"name": "PassagePolice2", "position": Vector2(720.0, 700.0), "weapon": "pistol", "facing": -90.0},
+]
+
 const FLOOR_COLOR := Color(0.16, 0.19, 0.24, 1.0)
 const WALL_COLOR := Color(0.42, 0.46, 0.52, 1.0)
 
@@ -100,6 +131,7 @@ func _ready() -> void:
 	_add_wall("AlternatePassageLeft", Rect2(340.0, 600.0, 20.0, 200.0))
 	_add_wall("AlternatePassageBottom", Rect2(350.0, 790.0, 500.0, 20.0))
 	_add_automatic_doors()
+	_post_police()
 
 	var player := get_node("Player") as CharacterBody2D
 	player.position = Vector2(225.0, 225.0)
@@ -206,6 +238,18 @@ func _add_automatic_doors() -> void:
 		door.position = location["position"]
 		door.rotation_degrees = location["rotation"]
 		_world.add_child(door)
+
+
+func _post_police() -> void:
+	var enemies := get_node("Enemies") as Node2D
+	var template := enemies.get_node("Enemy1") as Enemy
+	for post: Dictionary in POLICE_POSTS:
+		var policeman := template.duplicate() as Enemy
+		policeman.name = post["name"]
+		policeman.position = enemies.to_local(post["position"])
+		(policeman.get_node("Gun") as EnemyGun).weapon_type = post["weapon"]
+		(policeman.get_node("Vision") as Node2D).rotation_degrees = post["facing"]
+		enemies.add_child(policeman)
 
 
 func get_area_id_at(global_point: Vector2) -> StringName:

@@ -24,6 +24,10 @@ func _test_backspace_discards_loot_thrown_guns_doors_and_exit_progress() -> void
 	var level := await _start_level()
 	var player := level.get_node("Player") as Player
 	var enemy := level.get_node("Enemies/Enemy1") as Enemy
+	# Every other posted policeman dies too, so the exit unlocks when Enemy1 is shot.
+	for policeman in _police(level):
+		if policeman != enemy:
+			policeman.kill_permanently()
 	player.global_position = level.get_node("Pickups/Pistol").global_position
 	await _press("interact")
 	enemy.global_position = Vector2(650, 350)
@@ -91,6 +95,10 @@ func _expect_level_start(level: Node, label: String) -> void:
 		"%s respawns the player at the start with full motivation, fists and no magazines" % label)
 	_expect(enemy.life_state == &"living" and not enemy.is_alerted,
 		"%s restores the policeman alive and unalerted" % label)
+	var police := _police(level)
+	_expect(police.size() == PrisonLevel.POLICE_POSTS.size() + 1
+		and police.all(func(policeman: Enemy) -> bool: return policeman.life_state == &"living" and not policeman.is_alerted),
+		"%s restores all %d posted policemen alive and unalerted" % [label, police.size()])
 	_expect(level.has_node("Pickups/Pistol") and level.has_node("Pickups/Shotgun") and level.has_node("Pickups/AK47")
 		and level.has_node("PistolMagazine") and level.has_node("ShotgunMagazine") and level.has_node("AK-47Magazine")
 		and get_nodes_in_group("police_drops").is_empty() and get_nodes_in_group("thrown_weapons").is_empty()
@@ -140,6 +148,14 @@ func _press(action: String) -> void:
 	await physics_frame
 	Input.action_release(action)
 	await process_frame
+
+
+func _police(level: Node) -> Array[Enemy]:
+	var police: Array[Enemy] = []
+	for policeman in get_nodes_in_group("police"):
+		if level.is_ancestor_of(policeman):
+			police.append(policeman as Enemy)
+	return police
 
 
 func _finish_level(level: Node) -> void:
