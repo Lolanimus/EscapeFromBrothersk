@@ -25,6 +25,7 @@ func _run() -> void:
 func _prepare() -> Node2D:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 	var player := level.get_node("Player") as Player
@@ -238,3 +239,13 @@ func _test_lethal_damage_cancels() -> void:
 	check(player.is_dead and not player.get_node("CanvasLayer/ChokeProgress").visible,
 		"lethal damage ends the choke and hides its progress")
 	await _finish(level)
+
+
+## Story 16 posts 24 police in the level. This suite exercises one policeman's
+## mechanics (or player navigation), so only Enemy1 is kept to stop the rest of
+## the roster from seeing, shooting or blocking shots aimed at the subject.
+func _keep_only_enemy1(level: Node) -> void:
+	for policeman in get_nodes_in_group("police"):
+		if level.is_ancestor_of(policeman) and policeman.name != &"Enemy1":
+			policeman.get_parent().remove_child(policeman)
+			policeman.free()
