@@ -324,7 +324,7 @@ texture = ExtResource("24_ak47")
 position = Vector2(663, 318)
 
 [node name="Enemy1" type="CharacterBody2D" parent="Enemies" unique_id=1032443518 groups=["police"]]
-position = Vector2(10, 202)
+position = Vector2(10, 172)
 collision_layer = 2
 collision_mask = 9
 script = ExtResource("3_enemy")
@@ -370,3 +370,21 @@ position = Vector2(388, 391)
 
 [node name="AK-47Magazine" parent="." unique_id=32270923 instance=ExtResource("17_y6deb")]
 position = Vector2(969, 521)
+
+[node name="PistolMagazine2" parent="." instance=ExtResource("22_pm3ni")]
+position = Vector2(1250, 820)
+
+[node name="PistolMagazine3" parent="." instance=ExtResource("22_pm3ni")]
+position = Vector2(1150, 160)
+
+[node name="ShotgunMagazine2" parent="." instance=ExtResource("23_pm3ni")]
+position = Vector2(1080, 330)
+
+[node name="ShotgunMagazine3" parent="." instance=ExtResource("23_pm3ni")]
+position = Vector2(1330, 180)
+
+[node name="ShotgunMagazine4" parent="." instance=ExtResource("23_pm3ni")]
+position = Vector2(1200, 520)
+
+[node name="ShotgunMagazine5" parent="." instance=ExtResource("23_pm3ni")]
+position = Vector2(1100, 900)
