@@ -11,6 +11,7 @@ var level_complete := false
 var _exit_gate: StaticBody2D
 var _exit_status: Label
 var _transition_pending := false
+var _restart_pending := false
 
 const AREA_RECTS: Dictionary = {
 	&"starting_cell": Rect2(100.0, 100.0, 250.0, 250.0),
@@ -112,28 +113,35 @@ func _ready() -> void:
 
 
 func _physics_process(_delta: float) -> void:
+	var player := get_node("Player") as Player
+
 	if not exit_unlocked:
 		for policeman in get_tree().get_nodes_in_group("police"):
 			if is_ancestor_of(policeman) and policeman.life_state != &"dead":
 				return
+
 		exit_unlocked = true
 		_exit_status.text = "EXIT OPEN"
 		_exit_gate.visible = false
 		_exit_gate.get_node("CollisionShape2D").set_deferred("disabled", true)
-	var player := get_node("Player") as Player
-	if not level_complete and not player.is_dead and EXIT_THRESHOLD.has_point(player.global_position):
+
+	if not level_complete and EXIT_THRESHOLD.has_point(player.global_position):
 		level_complete = true
+
 		for child in get_children():
 			child.process_mode = Node.PROCESS_MODE_DISABLED
+
 		var layer := CanvasLayer.new()
 		layer.name = "CompletionLayer"
 		layer.layer = 10
 		add_child(layer)
+
 		var overlay := ColorRect.new()
 		overlay.name = "LevelComplete"
 		overlay.color = Color(0.02, 0.04, 0.08, 0.9)
 		overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		layer.add_child(overlay)
+
 		var label := Label.new()
 		label.text = "LEVEL COMPLETE\nPress a key or click to continue"
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -142,14 +150,33 @@ func _physics_process(_delta: float) -> void:
 		label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		overlay.add_child(label)
 
-
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey:
+		if event.keycode == KEY_BACKSPACE and event.pressed and not event.is_echo():
+			get_viewport().set_input_as_handled()
+			_restart_level()
+			return
+
 	if not level_complete or _transition_pending or next_level_scene == null:
 		return
+
 	if (event is InputEventKey or event is InputEventMouseButton) and event.is_pressed() and not event.is_echo():
 		_transition_pending = true
 		get_viewport().set_input_as_handled()
 		call_deferred("_load_next_level")
+		
+		
+func _restart_level() -> void:
+	if _restart_pending:
+		return
+
+	_restart_pending = true
+
+	var result := get_tree().reload_current_scene()
+
+	if result != OK:
+		_restart_pending = false
+		push_error("Could not restart level: %s" % error_string(result))
 
 
 func _load_next_level() -> void:
@@ -277,17 +304,17 @@ func _connect_route(first_area_id: int, door_id: int, second_area_id: int) -> vo
 
 
 func _add_floor(area_id: StringName, area_rect: Rect2) -> void:
-	var floor := Polygon2D.new()
-	floor.name = String(area_id).to_pascal_case()
-	floor.polygon = PackedVector2Array([
+	var floor_node := Polygon2D.new()
+	floor_node.name = String(area_id).to_pascal_case()
+	floor_node.polygon = PackedVector2Array([
 		area_rect.position,
 		Vector2(area_rect.end.x, area_rect.position.y),
 		area_rect.end,
 		Vector2(area_rect.position.x, area_rect.end.y),
 	])
-	floor.color = FLOOR_COLOR
-	floor.z_index = -10
-	_world.add_child(floor)
+	floor_node.color = FLOOR_COLOR
+	floor_node.z_index = -10
+	_world.add_child(floor_node)
 
 	var label := Label.new()
 	label.position = area_rect.position + Vector2(20.0, 16.0)
