@@ -6,10 +6,10 @@
 
 **Blocked by:** 07: Collect and retain weapon-specific magazines.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Pressing R with a compatible retained magazine destroys the current magazine and all ammunition remaining inside it, then loads one full retained magazine.
-- [ ] A magazine is destroyed when its ammunition reaches zero.
-- [ ] Attempting to fire without ammunition produces an observable empty-gun state without firing a projectile.
-- [ ] Loaded rounds, retained counts, destructive reloads, empty-magazine destruction, and the four-magazine limit are verified for each magazine type.
+- [x] Pressing R with a compatible retained magazine destroys the current magazine and all ammunition remaining inside it, then loads one full retained magazine.
+- [x] A magazine is destroyed when its ammunition reaches zero.
+- [x] Attempting to fire without ammunition produces an observable empty-gun state without firing a projectile.
+- [x] Loaded rounds, retained counts, destructive reloads, empty-magazine destruction, and the four-magazine limit are verified for each magazine type.
 

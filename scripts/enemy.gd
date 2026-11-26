@@ -10,6 +10,7 @@ const LIVING_COLOR := Color(0.85, 0.12, 0.2, 1.0)
 const KNOCKED_DOWN_COLOR := Color(0.42, 0.48, 0.58, 1.0)
 const RECOVERING_COLOR := Color(1.0, 0.66, 0.16, 1.0)
 const DEAD_COLOR := Color(0.2, 0.22, 0.26, 1.0)
+const ThrownWeaponScript := preload("res://scripts/thrown_weapon.gd")
 
 # whenever the variable is @export_range, 
 # you can access it from inside the Godot editor, and change it there.
@@ -148,6 +149,7 @@ func kill_permanently() -> void:
 	modulate = Color(0.35, 0.35, 0.35, 1.0)
 	if gun != null:
 		gun.set_trigger(false)
+	_drop_weapon()
 	set_physics_process(false)
 	recovery_time_remaining = 0.0
 	recovery_warning.visible = false
@@ -247,3 +249,18 @@ func _is_player_inside_cone() -> bool:
 	query.exclude = [get_rid()]
 	query.collision_mask = vision.vision_collision_mask
 	return get_world_2d().direct_space_state.intersect_ray(query).is_empty()
+
+
+func _drop_weapon() -> void:
+	if gun == null:
+		return
+	var dropped_weapon := ThrownWeaponScript.new()
+	dropped_weapon.weapon_type = StringName(gun.weapon_type)
+	# -1 means a fresh full magazine.
+	dropped_weapon.loaded_rounds = -1
+	dropped_weapon.position = global_position
+	dropped_weapon.add_to_group("weapon_pickups")
+	# Police drops stay outside the level's placed Pickups so they never count toward its guaranteed supply.
+	dropped_weapon.add_to_group("police_drops")
+	# Deaths can happen inside physics callbacks, where adding an Area2D is not allowed.
+	get_tree().current_scene.add_child.call_deferred(dropped_weapon)

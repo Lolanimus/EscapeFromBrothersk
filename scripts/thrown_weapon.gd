@@ -4,18 +4,27 @@ var _direction := Vector2.RIGHT
 var _speed := 800.0
 var _source: CollisionObject2D
 var _flying := false
-
+const PISTOL_TEXTURE := preload("res://assets/sprites/weapon/Pistol.png")
+const SHOTGUN_TEXTURE := preload("res://assets/sprites/weapon/shotgun.png")
+const AK47_TEXTURE := preload("res://assets/sprites/weapon/ak47.png")
 
 func _ready() -> void:
 	collision_layer = 0
 	collision_mask = 0
-	var visual := Polygon2D.new()
+
+	var visual := Sprite2D.new()
 	visual.name = "Visual"
-	visual.polygon = PackedVector2Array([
-		Vector2(-15, -4), Vector2(15, -4), Vector2(15, 4),
-		Vector2(-4, 4), Vector2(-4, 10), Vector2(-10, 10),
-	])
-	visual.color = Color(0.75, 0.8, 0.85)
+
+	match weapon_type:
+		&"pistol":
+			visual.texture = PISTOL_TEXTURE
+		&"shotgun":
+			visual.texture = SHOTGUN_TEXTURE
+		&"ak47":
+			visual.texture = AK47_TEXTURE
+
+	visual.scale = Vector2(0.05, 0.05)
+	visual.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	add_child(visual)
 
 
