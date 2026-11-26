@@ -26,6 +26,7 @@
 [ext_resource type="PackedScene" uid="uid://c7llhut3utob2" path="res://scenes/ShotgunMagazine.tscn" id="23_pm3ni"]
 [ext_resource type="Texture2D" path="res://assets/sprites/weapon/ak47.png" id="24_ak47"]
 [ext_resource type="Texture2D" path="res://assets/sprites/weapon/shotgun.png" id="25_shotgun"]
+[ext_resource type="Texture2D" path="res://assets/sprites/weapon/Katana.png" id="26_katana"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_player"]
 animations = [{
@@ -250,6 +251,18 @@ text = "Restart level"
 
 [node name="Pickups" type="Node2D" parent="." unique_id=272605550]
 
+[node name="Katana" type="Area2D" parent="Pickups" groups=["weapon_pickups"]]
+position = Vector2(225, 267)
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("6_pickup")
+weapon_type = &"katana"
+
+[node name="Visual" type="Sprite2D" parent="Pickups/Katana"]
+texture_filter = 1
+scale = Vector2(0.075, 0.075)
+texture = ExtResource("26_katana")
+
 [node name="Pistol" type="Area2D" parent="Pickups" unique_id=1674564713 groups=["weapon_pickups"]]
 position = Vector2(290, 225)
 collision_layer = 0
@@ -325,6 +338,45 @@ script = ExtResource("20_gqmmt")
 script = ExtResource("22_jscy8")
 
 [node name="Sprite" type="Sprite2D" parent="Enemies/Enemy1/Gun" unique_id=403238186]
+texture_filter = 1
+position = Vector2(22, 0)
+scale = Vector2(0.05, 0.05)
+texture = ExtResource("13_pistol_pickup")
+
+[node name="Enemy2" type="CharacterBody2D" parent="Enemies" groups=["police"]]
+position = Vector2(50, 202)
+collision_layer = 2
+collision_mask = 9
+script = ExtResource("3_enemy")
+stop_distance = 40.0
+
+[node name="PoliceVisual" type="Polygon2D" parent="Enemies/Enemy2"]
+color = Color(0.85, 0.12, 0.2, 1)
+polygon = PackedVector2Array(-12, -18, 12, -18, 18, -10, 18, 10, 12, 18, -12, 18, -18, 10, -18, -10)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Enemies/Enemy2"]
+position = Vector2(-2, 3)
+shape = SubResource("RectangleShape2D_2urpc")
+debug_color = Color(0.9014307, 0, 0.21367055, 0.41960785)
+
+[node name="RecoveryWarning" type="Label" parent="Enemies/Enemy2"]
+visible = false
+offset_left = -46.0
+offset_top = -48.0
+offset_right = 70.0
+offset_bottom = -24.0
+theme_override_colors/font_color = Color(1, 0.72, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+text = "RECOVERING!"
+
+[node name="Vision" type="Node2D" parent="Enemies/Enemy2"]
+position = Vector2(-6, 2)
+script = ExtResource("20_gqmmt")
+
+[node name="Gun" type="Node2D" parent="Enemies/Enemy2"]
+script = ExtResource("22_jscy8")
+
+[node name="Sprite" type="Sprite2D" parent="Enemies/Enemy2/Gun"]
 texture_filter = 1
 position = Vector2(22, 0)
 scale = Vector2(0.05, 0.05)

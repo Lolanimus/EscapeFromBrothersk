@@ -10,6 +10,7 @@ func _initialize() -> void:
 func _run() -> void:
 	await _test_unlimited_sight_chases_and_shoots()
 	var level := GameplayScene.instantiate()
+	level.get_node("Enemies/Enemy2").free()
 	root.add_child(level)
 	current_scene = level
 	level.child_entered_tree.connect(func(node: Node):

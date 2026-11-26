@@ -28,8 +28,7 @@ func _run() -> void:
 		await physics_frame
 	Input.action_release("move_right")
 	check(player.global_position.x < 1640, "locked exit physically blocks departure")
-	var other := police.duplicate() as Enemy
-	level.get_node("Enemies").add_child(other)
+	var other := level.get_node("Enemies/Enemy2") as Enemy
 	other.set_physics_process(false)
 	police.knock_down()
 	await physics_frame
@@ -75,7 +74,8 @@ func _run() -> void:
 	root.add_child(level)
 	current_scene = level
 	await process_frame
-	level.get_node("Enemies/Enemy1").kill_permanently()
+	for guard in get_nodes_in_group("police"):
+		guard.kill_permanently()
 	level.get_node("Player").global_position = Vector2(1680, 875)
 	for frame in range(4):
 		await physics_frame

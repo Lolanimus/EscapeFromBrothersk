@@ -51,6 +51,7 @@ func _test_police_fire_six_pellets_in_fixed_spread() -> void:
 
 func _test_police_blast_damages_once() -> void:
 	var level := GameplayScene.instantiate()
+	level.get_node("Enemies/Enemy2").free()
 	root.add_child(level)
 	current_scene = level
 	await process_frame
@@ -129,6 +130,7 @@ func _press(action: String) -> void:
 
 func _test_player_six_blast_magazine_and_cadence() -> void:
 	var level := GameplayScene.instantiate()
+	level.get_node("Enemies/Enemy2").free()
 	root.add_child(level)
 	current_scene = level
 	await process_frame

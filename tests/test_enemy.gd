@@ -160,6 +160,7 @@ func _test_enemy_keeps_pursuing_the_current_target_after_losing_sight() -> void:
 
 func _test_alerted_enemy_takes_the_shortest_doorway_route_to_the_player() -> void:
 	var level := GameplayScene.instantiate()
+	level.get_node("Enemies/Enemy2").free()
 	root.add_child(level)
 	current_scene = level
 	await process_frame
@@ -199,6 +200,7 @@ func _test_alerted_enemy_takes_the_shortest_doorway_route_to_the_player() -> voi
 
 func _test_alerted_enemy_crosses_a_doorway_without_getting_stuck() -> void:
 	var level := GameplayScene.instantiate()
+	level.get_node("Enemies/Enemy2").free()
 	root.add_child(level)
 	current_scene = level
 	await process_frame
@@ -237,6 +239,7 @@ func _test_alerted_enemy_crosses_a_doorway_without_getting_stuck() -> void:
 
 func _test_alerted_enemy_routes_around_a_wall_between_two_doorways() -> void:
 	var level := GameplayScene.instantiate()
+	level.get_node("Enemies/Enemy2").free()
 	root.add_child(level)
 	current_scene = level
 	await process_frame

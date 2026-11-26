@@ -8,8 +8,10 @@
 
 **Status:** ready-for-agent
 
-- [ ] The player can carry at most one ranged weapon and one katana, with fists always available as the fallback.
-- [ ] E picks up or swaps the nearest weapon and Q switches between the carried ranged and melee weapons.
+- [x] The player can carry at most one ranged weapon and one katana, with fists always available as the fallback.
+- [x] E picks up or swaps the nearest weapon. 1 selects the melee slot and 2 selects the ranged slot.
 - [ ] The active weapon alone responds to attack and throw input.
-- [ ] The fate of a replaced ranged weapon and its loaded magazine is selected, documented, and tested without violating ammunition limits.
+- [x] The fate of a replaced ranged weapon and its loaded magazine is selected, documented, and tested without violating ammunition limits.
+
+Picking up a replacement gun drops the previous gun at the pickup spot with its loaded rounds. Press E to pick it back up. Spare magazines stay with the player.
 

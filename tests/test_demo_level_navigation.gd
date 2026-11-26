@@ -299,6 +299,7 @@ func _test_player_can_reach_the_guard_office_from_the_cell_block() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
 	current_scene = level
+	_disable_police_gunfire(level)
 	await process_frame
 
 	var player := level.get_node("Player") as CharacterBody2D

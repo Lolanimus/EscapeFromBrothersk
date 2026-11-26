@@ -197,6 +197,7 @@ func _test_player_bullet_kills_and_wall_blocks() -> void:
 
 func _test_police_automatic_fire_is_unlimited_and_configurable() -> void:
 	var level := GameplayScene.instantiate()
+	level.get_node("Enemies/Enemy2").free()
 	root.add_child(level)
 	current_scene = level
 	await process_frame
