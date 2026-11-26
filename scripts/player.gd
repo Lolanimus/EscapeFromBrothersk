@@ -225,6 +225,9 @@ func _acquire_nearest_weapon() -> void:
 
 	var incoming_type := StringName(nearest_pickup.get("weapon_type"))
 	var rounds := int(nearest_pickup.get("loaded_rounds"))
+	if incoming_type == active_weapon:
+		_collect_duplicate_magazine(nearest_pickup)
+		return
 	if rounds != 0 and _get_reserve_magazines(incoming_type) >= MAX_MAGAZINES_PER_WEAPON:
 		return
 	active_weapon = incoming_type
@@ -234,7 +237,21 @@ func _acquire_nearest_weapon() -> void:
 	_update_movement_animation(
 		Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	)
-	
+
+
+# A duplicate of the carried gun only gives up its full magazine; the gun itself stays on the floor.
+func _collect_duplicate_magazine(pickup: Node2D) -> void:
+	var rounds := int(pickup.get("loaded_rounds"))
+	if rounds >= 0 and rounds != RangedWeapon.capacity(active_weapon):
+		return
+	var loaded_magazines := 1 if get_loaded_rounds() > 0 else 0
+	if _get_reserve_magazines(active_weapon) + loaded_magazines >= MAX_MAGAZINES_PER_WEAPON:
+		return
+	_set_reserve_magazines(active_weapon, _get_reserve_magazines(active_weapon) + 1)
+	pickup.set("loaded_rounds", 0)
+	_show_pickup_feedback("Magazine collected!")
+
+
 func _collect_nearest_magazine() -> void:
 	var nearest: Node2D = null
 	var nearest_distance := interaction_distance

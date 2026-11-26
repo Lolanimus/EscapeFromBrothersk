@@ -89,6 +89,22 @@ func _run() -> void:
 		"mouse click loads an alternative configured scene")
 	current_scene.queue_free()
 	await process_frame
+	# A dead player whose body lies past the exit must not complete the level.
+	level = GameplayScene.instantiate()
+	root.add_child(level)
+	current_scene = level
+	await process_frame
+	level.get_node("Enemies/Enemy1").kill_permanently()
+	player = level.get_node("Player") as Player
+	for hit in range(4):
+		player.take_police_projectile_hit()
+	player.global_position = Vector2(1680, 875)
+	for frame in range(4):
+		await physics_frame
+	check(player.is_dead and not level.level_complete and not level.has_node("CompletionLayer"),
+		"a dead player inside the exit does not complete the level")
+	level.queue_free()
+	await process_frame
 	quit(failures)
 
 func check(ok: bool, message: String) -> void:

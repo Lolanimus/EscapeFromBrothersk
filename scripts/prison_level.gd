@@ -125,7 +125,7 @@ func _physics_process(_delta: float) -> void:
 		_exit_gate.visible = false
 		_exit_gate.get_node("CollisionShape2D").set_deferred("disabled", true)
 
-	if not level_complete and EXIT_THRESHOLD.has_point(player.global_position):
+	if not level_complete and not player.is_dead and EXIT_THRESHOLD.has_point(player.global_position):
 		level_complete = true
 
 		for child in get_children():

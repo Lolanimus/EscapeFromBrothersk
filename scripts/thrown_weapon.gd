@@ -4,7 +4,7 @@ var _direction := Vector2.RIGHT
 var _speed := 800.0
 var _source: CollisionObject2D
 var _flying := false
-const PISTOL_TEXTURE := preload("res://assets/sprites/weapon/pistol.png")
+const PISTOL_TEXTURE := preload("res://assets/sprites/weapon/Pistol.png")
 const SHOTGUN_TEXTURE := preload("res://assets/sprites/weapon/shotgun.png")
 const AK47_TEXTURE := preload("res://assets/sprites/weapon/ak47.png")
 
