@@ -82,6 +82,7 @@ func _test_environment_stops_guns_with_visible_impact() -> void:
 func _start_level() -> Node:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 	level.get_node("Player/Camera2D").enabled = false
@@ -174,3 +175,13 @@ func _expect(condition: bool, description: String) -> void:
 	else:
 		_failures += 1
 		push_error("FAIL: " + description)
+
+
+## Story 16 posts 24 police in the level. This suite exercises one policeman's
+## mechanics (or player navigation), so only Enemy1 is kept to stop the rest of
+## the roster from seeing, shooting or blocking shots aimed at the subject.
+func _keep_only_enemy1(level: Node) -> void:
+	for policeman in get_nodes_in_group("police"):
+		if level.is_ancestor_of(policeman) and policeman.name != &"Enemy1":
+			policeman.get_parent().remove_child(policeman)
+			policeman.free()

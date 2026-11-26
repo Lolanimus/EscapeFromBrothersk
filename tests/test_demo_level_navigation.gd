@@ -55,6 +55,7 @@ func _run_tests() -> void:
 func _test_player_cannot_walk_through_a_wall() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 
@@ -87,6 +88,7 @@ func _test_player_cannot_walk_through_a_wall() -> void:
 func _test_camera_shifts_toward_the_mouse_cursor() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 
@@ -111,6 +113,7 @@ func _test_camera_shifts_toward_the_mouse_cursor() -> void:
 func _test_player_can_move_through_another_character() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 
@@ -137,6 +140,7 @@ func _test_player_can_move_through_another_character() -> void:
 func _test_player_body_stays_static_while_active_weapon_aims_at_cursor() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 
@@ -163,6 +167,7 @@ func _test_player_body_stays_static_while_active_weapon_aims_at_cursor() -> void
 func _test_player_starts_unarmed_with_fists_active() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 
@@ -179,6 +184,7 @@ func _test_player_starts_unarmed_with_fists_active() -> void:
 func _test_camera_eases_toward_its_mouse_look_ahead() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 
@@ -198,6 +204,7 @@ func _test_camera_eases_toward_its_mouse_look_ahead() -> void:
 
 	level = GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 
@@ -225,6 +232,7 @@ func _test_camera_eases_toward_its_mouse_look_ahead() -> void:
 func _test_player_and_camera_can_travel_beyond_the_initial_viewport() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	_disable_police_gunfire(level)
 	await process_frame
@@ -251,6 +259,7 @@ func _test_player_and_camera_can_travel_beyond_the_initial_viewport() -> void:
 func _test_player_starts_inside_a_cell_with_solid_walls() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 
@@ -277,6 +286,7 @@ func _test_player_starts_inside_a_cell_with_solid_walls() -> void:
 func _test_player_can_leave_the_cell_for_the_cell_block() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 
@@ -298,6 +308,7 @@ func _test_player_can_leave_the_cell_for_the_cell_block() -> void:
 func _test_player_can_reach_the_guard_office_from_the_cell_block() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 
@@ -319,6 +330,7 @@ func _test_player_can_reach_the_guard_office_from_the_cell_block() -> void:
 func _test_player_can_reach_storage_from_the_guard_office() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	_disable_police_gunfire(level)
 	await process_frame
@@ -341,6 +353,7 @@ func _test_player_can_reach_storage_from_the_guard_office() -> void:
 func _test_player_can_enter_the_central_corridor_from_storage() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	_disable_police_gunfire(level)
 	await process_frame
@@ -368,6 +381,7 @@ func _test_player_can_enter_the_central_corridor_from_storage() -> void:
 func _test_player_can_reach_the_exercise_yard_from_the_corridor() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	_disable_police_gunfire(level)
 	await process_frame
@@ -402,6 +416,7 @@ func _test_player_can_reach_the_exercise_yard_from_the_corridor() -> void:
 func _test_player_can_reach_the_exit_from_the_exercise_yard() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	_disable_police_gunfire(level)
 	await process_frame
@@ -442,6 +457,7 @@ func _test_player_can_reach_the_exit_from_the_exercise_yard() -> void:
 func _test_player_can_use_the_alternate_side_passage_to_the_yard() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	_disable_police_gunfire(level)
 	await process_frame
@@ -476,6 +492,7 @@ func _test_player_can_use_the_alternate_side_passage_to_the_yard() -> void:
 func _test_prison_contains_exactly_the_seven_selected_rooms() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 
@@ -507,6 +524,7 @@ func _test_prison_contains_exactly_the_seven_selected_rooms() -> void:
 func _test_player_can_traverse_every_prison_door() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	_disable_police_gunfire(level)
 	await process_frame
@@ -560,6 +578,7 @@ func _test_player_can_traverse_every_prison_door() -> void:
 func _test_policeman_approaching_a_door_opens_it_permanently() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 
@@ -606,6 +625,7 @@ func _test_policeman_approaching_a_door_opens_it_permanently() -> void:
 func _test_closed_door_blocks_movement_until_opened() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 
@@ -650,6 +670,7 @@ func _test_closed_door_blocks_movement_until_opened() -> void:
 func _test_closed_door_blocks_sight_and_open_door_allows_it() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 
@@ -668,6 +689,7 @@ func _test_closed_door_blocks_sight_and_open_door_allows_it() -> void:
 
 	level = GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 	player = level.get_node("Player") as CharacterBody2D
@@ -711,3 +733,13 @@ func _disable_police_gunfire(level: Node) -> void:
 		var gun := policeman.get_node_or_null("Gun")
 		if gun != null:
 			gun.set_physics_process(false)
+
+
+## Story 16 posts 24 police in the level. This suite exercises one policeman's
+## mechanics (or player navigation), so only Enemy1 is kept to stop the rest of
+## the roster from seeing, shooting or blocking shots aimed at the subject.
+func _keep_only_enemy1(level: Node) -> void:
+	for policeman in get_nodes_in_group("police"):
+		if level.is_ancestor_of(policeman) and policeman.name != &"Enemy1":
+			policeman.get_parent().remove_child(policeman)
+			policeman.free()

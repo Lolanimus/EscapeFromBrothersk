@@ -18,6 +18,7 @@ func _run_tests() -> void:
 func _test_police_fire_six_pellets_in_fixed_spread() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 	var player := level.get_node("Player") as Player
@@ -52,6 +53,7 @@ func _test_police_fire_six_pellets_in_fixed_spread() -> void:
 func _test_police_blast_damages_once() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 	var player := level.get_node("Player") as Player
@@ -72,6 +74,7 @@ func _test_police_blast_damages_once() -> void:
 func _test_police_cadence_and_unlimited_ammunition() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 	var player := level.get_node("Player") as Player
@@ -130,6 +133,7 @@ func _press(action: String) -> void:
 func _test_player_six_blast_magazine_and_cadence() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 	var player := await _equip_player(level)
@@ -161,6 +165,7 @@ func _test_player_six_blast_magazine_and_cadence() -> void:
 func _test_player_speed_kills_and_obstruction() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 	var player := await _equip_player(level)
@@ -205,6 +210,7 @@ func _test_player_speed_kills_and_obstruction() -> void:
 func _test_closed_door_blocks_shotgun() -> void:
 	var level := GameplayScene.instantiate()
 	root.add_child(level)
+	_keep_only_enemy1(level)
 	current_scene = level
 	await process_frame
 	var player := await _equip_player(level)
@@ -244,3 +250,13 @@ func _expect(condition: bool, message: String) -> void:
 	else:
 		_failures += 1
 		push_error("FAIL: %s" % message)
+
+
+## Story 16 posts 24 police in the level. This suite exercises one policeman's
+## mechanics (or player navigation), so only Enemy1 is kept to stop the rest of
+## the roster from seeing, shooting or blocking shots aimed at the subject.
+func _keep_only_enemy1(level: Node) -> void:
+	for policeman in get_nodes_in_group("police"):
+		if level.is_ancestor_of(policeman) and policeman.name != &"Enemy1":
+			policeman.get_parent().remove_child(policeman)
+			policeman.free()
