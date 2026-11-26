@@ -6,12 +6,12 @@
 
 **Blocked by:** 03: Acquire and fire the pistol; 10: Punch and recover knocked-down police; 11: Choke a knocked-down policeman.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] The exit remains locked while any policeman is living or knocked down and unlocks only after every policeman is permanently dead.
-- [ ] Reaching the unlocked exit displays a Level Complete state and prevents normal gameplay from continuing unnoticed.
-- [ ] Further input during Level Complete loads the configured next-level scene.
-- [ ] The next-level scene is selected and documented, and objective behavior is tested for living, knocked-down, and permanently dead police.
+- [x] The exit remains locked while any policeman is living or knocked down and unlocks only after every policeman is permanently dead.
+- [x] Reaching the unlocked exit displays a Level Complete state and prevents normal gameplay from continuing unnoticed.
+- [x] Further input during Level Complete loads the configured next-level scene.
+- [x] The next-level scene is selected and documented, and objective behavior is tested for living, knocked-down, and permanently dead police.
 
 ## Implementation and verification
 
@@ -21,5 +21,5 @@
 - A fresh keyboard or mouse-button press continues. Mouse motion, releases, and key echoes do not dismiss the overlay. Scene changes are deferred and protected against duplicate input.
 - Default destination: `res://scenes/next_level.tscn`, a static next-level placeholder. Override the exported `next_level_scene` PackedScene on the prison level to configure another destination. No additional progression system is introduced.
 - Headless scene tests cover living and unconscious police, multiple police, the physical gate, normal movement through the opened exit, completion freeze, keyboard continuation, mouse-motion filtering, and a mouse-click transition to an alternative configured scene.
-- Automated checks pass; visual/manual playtesting remains pending, so the story is not marked done yet. No commit, push, or merge was performed.
+- Automated checks pass, and the user completed the manual play-test on 2026-11-26.
 
