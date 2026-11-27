@@ -5,6 +5,7 @@ signal died
 
 const RangedWeapon := preload("res://scripts/ranged_weapon.gd")
 const ThrownWeaponScript := preload("res://scripts/thrown_weapon.gd")
+const Feedback := preload("res://scripts/feedback_audio.gd")
 const SHOTGUN_TEXTURE := preload("res://assets/sprites/weapon/shotgun.png")
 const AK47_TEXTURE := preload("res://assets/sprites/weapon/ak47.png")
 const KATANA_SWING_SHEETS := {
@@ -63,8 +64,6 @@ var motivation := 100
 var pistol_magazines = 0
 var pistol_bullet = 12
 
-const MAX_MAG = 3
-const MAX_PISTOL_BULLET = 12
 const MAX_MOTIVATION = 100
 
 var shotgun_magazines: int = 0
@@ -72,6 +71,7 @@ var ak47_magazines: int = 0
 var shotgun_bullet: int = 6
 var ak47_bullet: int = 31
 var _held_gun: Sprite2D
+var _crosshair := Node2D.new()
 var _katana_vfx := AnimatedSprite2D.new()
 var _katana_vfx_bounds: Dictionary[StringName, Rect2] = {}
 
@@ -89,8 +89,10 @@ func _process(_delta: float) -> void:
 	$CanvasLayer/ChokeProgress.visible = _choke_elapsed > 0.0
 	$CanvasLayer/ChokeLabel.visible = _choke_elapsed > 0.0
 	stats_label.text = "motivation: %d/%d" % [motivation, MAX_MOTIVATION]
-	stats_label.text += "\nShotgun magazines: " + str(shotgun_magazines)
-	stats_label.text += "\nAK-47 magazines: " + str(ak47_magazines)
+	# Retained magazines are counted against the same per-type limit for all three guns.
+	stats_label.text += "\nPistol magazines: %d/%d" % [pistol_magazines, MAX_MAGAZINES_PER_WEAPON]
+	stats_label.text += "\nShotgun magazines: %d/%d" % [shotgun_magazines, MAX_MAGAZINES_PER_WEAPON]
+	stats_label.text += "\nAK-47 magazines: %d/%d" % [ak47_magazines, MAX_MAGAZINES_PER_WEAPON]
 	stats_label.text += "\nActive: " + String(active_weapon)
 	stats_label.text += "\n1  %s    2  %s" % [
 		String(_melee_weapon()).capitalize(),
@@ -100,18 +102,6 @@ func _process(_delta: float) -> void:
 		stats_label.text += "\nLoaded: %d/%d" % [get_loaded_rounds(), RangedWeapon.capacity(active_weapon)]
 		if get_loaded_rounds() == 0:
 			stats_label.text += " EMPTY"
-	
-	
-	if active_weapon == &"pistol":
-		stats_label.text += "\nPistol magazines: %d/%d" % [
-			pistol_magazines,
-			MAX_MAG
-		]
-		stats_label.text += "\nPistol bullets: %d/%d" % [
-			pistol_bullet,
-			MAX_PISTOL_BULLET
-		]
-		
 
 
 func _ready() -> void:
@@ -123,6 +113,7 @@ func _ready() -> void:
 	aim_pivot.add_child(_held_gun)
 	_update_held_gun()
 	$CanvasLayer/RestartButton.pressed.connect(_restart_level)
+	_add_crosshair()
 	_add_katana_animations()
 	skin.animation_finished.connect(_on_skin_animation_finished)
 	skin.frame_changed.connect(_update_skin_frame_offset)
@@ -134,6 +125,7 @@ func _input(event: InputEvent) -> void:
 		return
 
 	var mouse_motion := event as InputEventMouseMotion
+	_crosshair.position = mouse_motion.position
 	var player_viewport_position: Vector2 = get_global_transform_with_canvas() * Vector2.ZERO
 	var cursor_direction := mouse_motion.position - player_viewport_position
 	aim_pivot.global_rotation = cursor_direction.angle()
@@ -186,6 +178,12 @@ func _physics_process(delta: float) -> void:
 			&"ak47": _pistol_cooldown_remaining = ak47_firing_cadence
 	elif Input.is_action_just_pressed("shoot") and active_weapon == &"fists":
 		_punch_targeted_policeman()
+	elif (
+		Input.is_action_just_pressed("shoot")
+		and active_weapon in [&"pistol", &"shotgun", &"ak47"]
+		and get_loaded_rounds() == 0
+	):
+		Feedback.play_cue(self, &"empty_click", global_position)
 	elif Input.is_action_just_pressed("shoot") and active_weapon == &"katana" and is_zero_approx(_katana_cooldown_remaining):
 		_swing_katana()
 	if Input.is_action_just_pressed("reload"):
@@ -276,6 +274,7 @@ func _acquire_nearest_weapon() -> void:
 	_set_loaded_rounds(incoming_type, rounds if rounds >= 0 else RangedWeapon.capacity(incoming_type))
 	nearest_pickup.queue_free()
 	_equip(incoming_type)
+	Feedback.play_cue(self, &"weapon_pickup", global_position)
 
 
 # The katana fills the melee slot without touching the carried gun; only one katana exists.
@@ -285,6 +284,7 @@ func _acquire_katana(pickup: Node2D) -> void:
 	carried_melee_weapon = &"katana"
 	pickup.queue_free()
 	_equip(&"katana")
+	Feedback.play_cue(self, &"weapon_pickup", global_position)
 
 
 # Fists are the melee side of the loadout whenever no katana is carried.
@@ -320,6 +320,7 @@ func _collect_duplicate_magazine(pickup: Node2D) -> void:
 	_set_reserve_magazines(carried, _get_reserve_magazines(carried) + 1)
 	pickup.set("loaded_rounds", 0)
 	_show_pickup_feedback("Magazine collected!")
+	Feedback.play_cue(self, &"magazine_pickup", global_position)
 
 
 func _collect_nearest_magazine() -> void:
@@ -350,6 +351,7 @@ func _collect_nearest_magazine() -> void:
 	_set_reserve_magazines(weapon_type, _get_reserve_magazines(weapon_type) + 1)
 			
 	_show_pickup_feedback("Magazine collected!")
+	Feedback.play_cue(self, &"magazine_pickup", global_position)
 	nearest.queue_free()
 
 
@@ -454,6 +456,7 @@ func _play_attack_animation(side_animation: StringName, up_animation: StringName
 # footprint, unless a wall or closed door stands between him and the player.
 func _swing_katana() -> void:
 	_katana_cooldown_remaining = katana_swing_cadence
+	Feedback.play_cue(self, &"katana_swing", global_position)
 	var direction := Vector2.RIGHT.rotated(aim_pivot.global_rotation)
 	_play_katana_animation(direction)
 	var hit_rect := _katana_vfx_bounds[_katana_vfx.animation]
@@ -533,6 +536,7 @@ func _play_katana_animation(direction: Vector2, show_slash_effect: bool = true) 
 
 func _punch_targeted_policeman() -> void:
 	_play_attack_animation(&"punch_side", &"punch_up")
+	Feedback.play_cue(self, &"punch", global_position)
 	var attack_direction := Vector2.RIGHT.rotated(aim_pivot.global_rotation)
 	var target: Node2D = null
 	var closest_distance := 64.0
@@ -590,6 +594,8 @@ func take_police_projectile_hit() -> void:
 		$CanvasLayer/DeathNotice.show()
 		$CanvasLayer/RestartButton.show()
 		$CanvasLayer/RestartButton.grab_focus()
+		release_cursor()
+		Feedback.play_cue(self, &"player_death")
 		died.emit()
 
 
@@ -609,6 +615,7 @@ func _reload_active_weapon() -> void:
 		return
 	_set_reserve_magazines(active_weapon, retained - 1)
 	_set_loaded_rounds(active_weapon, RangedWeapon.capacity(active_weapon))
+	Feedback.play_cue(self, &"reload", global_position)
 
 
 func _get_reserve_magazines(weapon_type: StringName) -> int:
@@ -667,6 +674,8 @@ func _update_choke(delta: float) -> bool:
 			if distance <= nearest_distance:
 				_choke_target = candidate
 				nearest_distance = distance
+		if is_instance_valid(_choke_target):
+			Feedback.play_cue(self, &"choking", _choke_target.global_position)
 	if not is_instance_valid(_choke_target):
 		return false
 	_choke_elapsed += delta
@@ -692,6 +701,30 @@ func _can_choke(candidate: Enemy) -> bool:
 	query.collision_mask = collision_mask
 	query.exclude = [get_rid(), candidate.get_rid()]
 	return get_world_2d().direct_space_state.intersect_ray(query).is_empty()
+
+
+# A drawn crosshair replaces the OS cursor during gameplay.
+func _add_crosshair() -> void:
+	_crosshair.name = "Crosshair"
+	_crosshair.position = get_viewport().get_mouse_position()
+	for arm: Vector2 in [Vector2.LEFT, Vector2.RIGHT, Vector2.UP, Vector2.DOWN]:
+		var line := Line2D.new()
+		line.points = PackedVector2Array([arm * 4.0, arm * 11.0])
+		line.width = 2.0
+		line.default_color = Color(1.0, 1.0, 1.0, 0.9)
+		_crosshair.add_child(line)
+	$CanvasLayer.add_child(_crosshair)
+	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+
+
+## Death and Level Complete hand the pointer back so their buttons stay usable.
+func release_cursor() -> void:
+	_crosshair.hide()
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+
+func _exit_tree() -> void:
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
 func _restart_level() -> void:

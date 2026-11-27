@@ -2,6 +2,7 @@ class_name PrisonLevel
 extends Node2D
 
 const AUTOMATIC_DOOR_SCRIPT := preload("res://scripts/automatic_door.gd")
+const Feedback := preload("res://scripts/feedback_audio.gd")
 const EXIT_THRESHOLD := Rect2(1650, 825, 100, 100)
 
 @export var next_level_scene: PackedScene = preload("res://scenes/next_level.tscn")
@@ -85,6 +86,9 @@ var _navigation_graph := AStar2D.new()
 
 func _ready() -> void:
 	_build_navigation_graph()
+	var feedback := Feedback.new()
+	feedback.name = Feedback.NODE_NAME
+	add_child(feedback)
 	_world.name = "Prison"
 	add_child(_world)
 	_add_floor(&"starting_cell", AREA_RECTS[&"starting_cell"])
@@ -161,7 +165,10 @@ func _physics_process(_delta: float) -> void:
 		level_complete = true
 
 		for child in get_children():
-			child.process_mode = Node.PROCESS_MODE_DISABLED
+			if child.name != Feedback.NODE_NAME:
+				child.process_mode = Node.PROCESS_MODE_DISABLED
+		player.release_cursor()
+		Feedback.play_cue(self, &"level_complete")
 
 		var layer := CanvasLayer.new()
 		layer.name = "CompletionLayer"

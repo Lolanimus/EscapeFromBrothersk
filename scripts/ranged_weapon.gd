@@ -8,6 +8,7 @@ class BlastHit:
 
 const Magazine := preload("res://scripts/MagazinePickup.gd")
 const Gunfire := preload("res://scripts/gunfire.gd")
+const Feedback := preload("res://scripts/feedback_audio.gd")
 const PlayerProjectile := preload("res://scenes/pistol_projectile.tscn")
 const PoliceProjectile := preload("res://scenes/enemy_projectile.tscn")
 
@@ -30,6 +31,7 @@ static func pellet_offsets(weapon_type: StringName) -> Array[float]:
 
 static func fire(parent: Node, weapon_type: StringName, origin: Vector2, direction: Vector2, speed: float, police: bool = false) -> Array[Node2D]:
 	Gunfire.notify(parent, origin)
+	Feedback.play_cue(parent, StringName("%s_fire" % weapon_type), origin)
 	var projectiles: Array[Node2D] = []
 	var blast_hit := BlastHit.new() if police and weapon_type == &"shotgun" else null
 	for offset in pellet_offsets(weapon_type):

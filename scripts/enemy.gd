@@ -11,6 +11,7 @@ const KNOCKED_DOWN_COLOR := Color(0.42, 0.48, 0.58, 1.0)
 const RECOVERING_COLOR := Color(1.0, 0.66, 0.16, 1.0)
 const DEAD_COLOR := Color(0.2, 0.22, 0.26, 1.0)
 const ThrownWeaponScript := preload("res://scripts/thrown_weapon.gd")
+const Feedback := preload("res://scripts/feedback_audio.gd")
 
 # whenever the variable is @export_range, 
 # you can access it from inside the Godot editor, and change it there.
@@ -103,6 +104,7 @@ func _physics_process(delta: float) -> void:
 
 	if target != null and not is_alerted and (player_in_cone if vision != null else _can_see_target()):
 		is_alerted = true
+		Feedback.play_cue(self, &"detection", global_position)
 		alerted.emit()
 
 	if vision != null:
@@ -168,6 +170,7 @@ func knock_down() -> void:
 	if gun != null:
 		gun.set_trigger(false)
 	_update_state_presentation()
+	Feedback.play_cue(self, &"knockout", global_position)
 
 
 func _update_state_presentation() -> void:

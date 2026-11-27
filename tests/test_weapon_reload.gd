@@ -35,7 +35,7 @@ func _test_pistol_reload_discards_partial_magazine_and_empty_fire_stops() -> voi
 	_expect(player.pistol_bullet == 12 and player.pistol_magazines == 0,
 		"R discards five remaining pistol rounds and loads one full 12-round retained magazine")
 	_expect(player.stats_label.text.contains("Loaded: 12/12")
-		and player.stats_label.text.contains("Pistol magazines: 0/3"),
+		and player.stats_label.text.contains("Pistol magazines: 0/4"),
 		"pistol HUD shows the loaded and retained counts after reloading")
 
 	player.pistol_bullet = 1
@@ -72,7 +72,7 @@ func _test_shotgun_reload_discards_partial_magazine_and_empty_fire_stops() -> vo
 	_expect(player.shotgun_bullet == 6 and player.shotgun_magazines == 0,
 		"R discards two remaining shotgun blasts and loads one full six-blast retained magazine")
 	_expect(player.stats_label.text.contains("Loaded: 6/6")
-		and player.stats_label.text.contains("Shotgun magazines: 0"),
+		and player.stats_label.text.contains("Shotgun magazines: 0/4"),
 		"shotgun HUD shows the loaded and retained counts after reloading")
 
 	player.shotgun_bullet = 1
@@ -109,7 +109,7 @@ func _test_ak47_reload_discards_partial_magazine_and_empty_fire_stops() -> void:
 	_expect(player.ak47_bullet == 31 and player.ak47_magazines == 0,
 		"R discards five remaining AK-47 rounds and loads one full 31-round retained magazine")
 	_expect(player.stats_label.text.contains("Loaded: 31/31")
-		and player.stats_label.text.contains("AK-47 magazines: 0"),
+		and player.stats_label.text.contains("AK-47 magazines: 0/4"),
 		"AK-47 HUD shows the loaded and retained counts after reloading")
 
 	player.ak47_bullet = 1
