@@ -11,7 +11,7 @@ func _initialize() -> void:
 
 
 func _run_tests() -> void:
-	await _test_backspace_discards_loot_thrown_guns_doors_and_exit_progress()
+	await _test_backspace_discards_loot_thrown_weapons_doors_and_exit_progress()
 	await _test_backspace_after_death_restores_knocked_down_police()
 	if _failures == 0:
 		print("PASS: all checkpoint restart tests passed")
@@ -20,7 +20,7 @@ func _run_tests() -> void:
 	quit(_failures)
 
 
-func _test_backspace_discards_loot_thrown_guns_doors_and_exit_progress() -> void:
+func _test_backspace_discards_loot_thrown_weapons_doors_and_exit_progress() -> void:
 	var level := await _start_level()
 	var player := level.get_node("Player") as Player
 	var enemy := level.get_node("Enemies/Enemy1") as Enemy
@@ -49,6 +49,16 @@ func _test_backspace_discards_loot_thrown_guns_doors_and_exit_progress() -> void
 		and player.carried_melee_weapon == &"katana" and doors_opened and level.exit_unlocked
 		and player.pistol_bullet < 12,
 		"the attempt takes the katana, kills police, drops loot, throws a gun, opens a door and unlocks the exit")
+	# Throwing at the wall east of (550, 350) lands the katana well within the wait.
+	player.global_position = Vector2(550, 350)
+	await physics_frame
+	await _aim_right(player)
+	await _throw_right()
+	await create_timer(0.6).timeout
+	var thrown_katana := get_nodes_in_group("weapon_pickups").any(
+		func(pickup: Node) -> bool: return StringName(pickup.get("weapon_type")) == &"katana")
+	_expect(player.carried_melee_weapon == &"" and thrown_katana,
+		"the attempt also throws the katana, which lands as a floor pickup")
 	await _restart_with_backspace(level, "Backspace while alive")
 
 
@@ -107,7 +117,7 @@ func _expect_level_start(level: Node, label: String) -> void:
 		and level.has_node("PistolMagazine") and level.has_node("ShotgunMagazine") and level.has_node("AK-47Magazine")
 		and get_nodes_in_group("police_drops").is_empty() and get_nodes_in_group("thrown_weapons").is_empty()
 		and get_nodes_in_group("weapon_pickups").size() == 4,
-		"%s restores placed pickups and removes loot and thrown guns" % label)
+		"%s restores placed pickups and removes loot and thrown weapons" % label)
 	_expect(get_nodes_in_group("automatic_doors").all(func(door: Node) -> bool: return not door.is_open)
 		and not level.exit_unlocked and not level.level_complete
 		and level.get_node("Prison/ExitStatus").text == "EXIT LOCKED",
