@@ -147,7 +147,7 @@ The following Fibonacci estimates are provisional. No story exceeds 8 points; im
 ## Further Notes
 
 - Gunfire hearing defaults to 800 pixels, configurable per policeman; scene tests cover in/out of range and sound through walls.
-- Ranged projectile speed defaults to 1200 pixels per second for player and police; player weapon exports and police gun overrides allow tuning. Ranged weapon throws default to 800 pixels per second, configurable on the player.
+- Ranged projectile speed defaults to 1200 pixels per second for player and police; player weapon exports and police gun overrides allow tuning. Weapon throws, ranged and katana alike, default to 800 pixels per second, configurable on the player.
 - Player firing cadence defaults to 0.25 seconds for pistol, 0.8 for shotgun, and 0.1 for AK-47. Police AK-47 cadence defaults to 0.1 seconds; police pistol/shotgun defaults remain 0.6/1.2 seconds. All are configurable.
 - The demo prison holds 24 policemen: 13 pistol, 7 shotgun, and 4 AK-47 users (story 16).
 - The pistol, shotgun, and AK-47 are deliberately placed. Placed full magazines are 3 pistol (36 rounds), 5 shotgun (30 blasts), and 1 AK-47 (31 bullets), each covering 24 one-hit kills plus 20% (29 rounds) after rounding up to whole magazines (story 16).
@@ -165,4 +165,4 @@ The following Fibonacci estimates are provisional. No story exceeds 8 points; im
 
 ## Current delivery scope
 
-Stories 06, 13, and 14 are implemented. Story 09 implements the carried loadout: one ranged slot, one melee slot that holds the katana or falls back to fists, Q switching (with 1 and 2 as direct shortcuts), and the selected ranged swap rule. Story 17 implements the placed katana and its rectangular-area swing. Story 18 currently implements ranged-weapon throwing only, as requested by the user; throwing the carried gun falls back to the melee side of the loadout. The complete katana throw criterion in story 18 remains open. These deferrals do not change the full-demo requirements above.
+Stories 06, 13, and 14 are implemented. Story 09 implements the carried loadout: one ranged slot, one melee slot that holds the katana or falls back to fists, Q switching (with 1 and 2 as direct shortcuts), and the selected ranged swap rule. Story 17 implements the placed katana and its rectangular-area swing. Story 18 implements throwing the active gun or katana; throwing the carried gun falls back to the melee side of the loadout, and throwing the katana empties the melee slot so fists become active while any carried gun stays carried. This delivery scope does not change the full-demo requirements above.

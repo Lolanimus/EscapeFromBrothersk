@@ -166,16 +166,31 @@ func _test_katana_fills_the_melee_slot_beside_the_gun() -> void:
 	player.global_position = Vector2(550, 350)
 	await _aim_right(player)
 	await _press("shoot")
-	await _press("throw_weapon")
 	_expect(get_nodes_in_group("player_projectiles").is_empty()
-		and get_nodes_in_group("thrown_weapons").is_empty()
-		and player.carried_ranged_weapon == &"pistol",
-		"with the katana active, left and right click do not use the carried pistol")
+		and player.carried_ranged_weapon == &"pistol" and player.pistol_bullet == 5,
+		"with the katana active, left click does not fire the carried pistol")
 	await _press_q()
 	await _press("throw_weapon")
 	_expect(player.active_weapon == &"katana" and player.carried_ranged_weapon == &""
 		and player.carried_melee_weapon == &"katana",
 		"throwing the pistol falls back to the carried katana")
+	await _finish_level(level)
+	# Story 18: right click with the katana active throws the katana, never the carried gun.
+	level = await _start_level()
+	player = level.get_node("Player") as Player
+	await _acquire_placed(level, "Pistol")
+	player.global_position = level.get_node("Pickups/Katana").global_position
+	await _press("interact")
+	player.global_position = Vector2(550, 350)
+	await _aim_right(player)
+	await _press("throw_weapon")
+	var thrown := get_nodes_in_group("thrown_weapons")
+	_expect(thrown.size() == 1 and StringName(thrown[0].get("weapon_type")) == &"katana"
+		and player.active_weapon == &"fists" and player.carried_melee_weapon == &""
+		and player.carried_ranged_weapon == &"pistol" and player.pistol_bullet == 12,
+		"throwing the katana empties the melee slot to fists and keeps the carried pistol")
+	await _press_q()
+	_expect(player.active_weapon == &"pistol", "Q still reaches the carried pistol after the katana is thrown")
 	await _finish_level(level)
 
 

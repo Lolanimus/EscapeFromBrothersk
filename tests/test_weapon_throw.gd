@@ -13,6 +13,8 @@ func _run_tests() -> void:
 	await _test_gun_knocks_down_only_first_police_and_preserves_ammo()
 	await _test_environment_stops_guns_with_visible_impact()
 	await _test_configured_speed_and_empty_gun_recovery()
+	await _test_katana_kills_only_first_police_and_is_recoverable()
+	await _test_environment_stops_katana_without_kills()
 	quit(_failures)
 
 
@@ -125,6 +127,87 @@ func _test_configured_speed_and_empty_gun_recovery() -> void:
 				and enemy.life_state == &"knocked_down",
 				"the empty %s knocks police down and stays empty after pickup" % setup.type)
 		await _finish_level(level)
+
+
+# Story 18: a thrown katana is lethal to the first policeman only, flies at the configured
+# speed, and lands as a standard pickup that E returns to the melee slot.
+func _test_katana_kills_only_first_police_and_is_recoverable() -> void:
+	var level := await _start_level()
+	var player := level.get_node("Player") as Player
+	player.thrown_weapon_speed = 500.0
+	await _acquire_pistol(level)
+	player.global_position = level.get_node("Pickups/Katana").global_position
+	await _press("interact")
+	player.global_position = Vector2(550, 350)
+	player.motivation = 50
+	var first := level.get_node("Enemies/Enemy1") as Enemy
+	var second := first.duplicate() as Enemy
+	first.get_parent().add_child(second)
+	second.set_physics_process(false)
+	first.global_position = player.global_position + Vector2(160, 0)
+	second.global_position = player.global_position + Vector2(260, 0)
+	await physics_frame
+	_expect(player.active_weapon == &"katana" and player.carried_ranged_weapon == &"pistol",
+		"the katana is active while the pistol stays carried")
+	await _aim_and_throw(player)
+	var flying := get_nodes_in_group("thrown_weapons")
+	_expect(flying.size() == 1 and StringName(flying[0].get("weapon_type")) == &"katana"
+		and player.carried_melee_weapon == &"" and player.active_weapon == &"fists"
+		and player.carried_ranged_weapon == &"pistol" and player.pistol_bullet == 12,
+		"right click throws the active katana, empties the melee slot to fists and keeps the pistol")
+	if flying.size() == 1:
+		var katana := flying[0] as Node2D
+		await physics_frame
+		var before := katana.global_position
+		for frame in range(4):
+			await physics_frame
+		_expect(absf(katana.global_position.distance_to(before) - 500.0 * 4.0 / Engine.physics_ticks_per_second) < 2.0,
+			"katana flight uses its configured speed of 500 pixels per second")
+	await create_timer(0.5).timeout
+	await physics_frame
+	var floor_katanas := _floor_weapons(&"katana")
+	_expect(first.life_state == &"dead" and second.life_state == &"living"
+		and get_nodes_in_group("thrown_weapons").is_empty() and floor_katanas.size() == 1,
+		"a thrown katana kills only the first policeman and rests on the floor")
+	_expect(player.motivation == 60 and get_nodes_in_group("police_drops").size() == 1,
+		"the katana throw kill restores 10 motivation and drops the police weapon")
+	if floor_katanas.size() == 1:
+		player.global_position = floor_katanas[0].global_position
+		await _press("interact")
+		_expect(player.active_weapon == &"katana" and player.carried_melee_weapon == &"katana"
+			and player.carried_ranged_weapon == &"pistol" and _floor_weapons(&"katana").is_empty(),
+			"E recovers the thrown katana into the melee slot")
+	await _finish_level(level)
+
+
+func _test_environment_stops_katana_without_kills() -> void:
+	for path_y in [350.0, 225.0]:
+		var level := await _start_level()
+		var player := level.get_node("Player") as Player
+		await _press("interact")
+		player.global_position = Vector2(550, path_y)
+		var enemy := level.get_node("Enemies/Enemy1") as Enemy
+		enemy.global_position = Vector2(950, path_y)
+		await physics_frame
+		await _aim_and_throw(player)
+		await create_timer(0.45).timeout
+		var visible_impact := false
+		for pickup in _floor_weapons(&"katana"):
+			var cue := pickup.get_node_or_null("ImpactFeedback") as Label
+			if cue != null:
+				visible_impact = cue.visible and cue.text == "IMPACT" and pickup.global_position.x < 860
+		_expect(enemy.life_state == &"living" and visible_impact and get_nodes_in_group("thrown_weapons").is_empty(),
+			"a %s stops the thrown katana, which kills nobody, shows impact and lies on the floor" % (
+				"wall" if path_y == 350.0 else "closed door"))
+		await _finish_level(level)
+
+
+func _floor_weapons(weapon_type: StringName) -> Array[Node]:
+	var weapons: Array[Node] = []
+	for pickup in get_nodes_in_group("weapon_pickups"):
+		if StringName(pickup.get("weapon_type")) == weapon_type and not pickup.is_queued_for_deletion():
+			weapons.append(pickup)
+	return weapons
 
 
 func _acquire_pistol(level: Node) -> void:

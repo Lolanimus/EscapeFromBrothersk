@@ -386,8 +386,10 @@ func _set_loaded_rounds(weapon_type: StringName, rounds: int) -> void:
 		&"ak47": ak47_bullet = maxi(rounds, 0)
 
 
+# Throwing empties the active carried slot; the player falls back to the melee side,
+# which is fists once the katana itself is thrown. A carried gun stays carried.
 func _throw_active_weapon() -> void:
-	if active_weapon not in [&"pistol", &"shotgun", &"ak47"]:
+	if active_weapon not in [&"pistol", &"shotgun", &"ak47", &"katana"]:
 		return
 	var thrown := ThrownWeaponScript.new()
 	thrown.weapon_type = active_weapon
@@ -395,8 +397,11 @@ func _throw_active_weapon() -> void:
 	get_tree().current_scene.add_child(thrown)
 	thrown.global_position = global_position
 	thrown.launch(Vector2.RIGHT.rotated(aim_pivot.global_rotation), thrown_weapon_speed, self)
-	_set_loaded_rounds(active_weapon, 0)
-	carried_ranged_weapon = &""
+	if active_weapon == &"katana":
+		carried_melee_weapon = &""
+	else:
+		_set_loaded_rounds(active_weapon, 0)
+		carried_ranged_weapon = &""
 	_equip(_melee_weapon())
 
 

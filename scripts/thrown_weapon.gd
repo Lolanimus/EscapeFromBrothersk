@@ -7,6 +7,7 @@ var _flying := false
 const PISTOL_TEXTURE := preload("res://assets/sprites/weapon/Pistol.png")
 const SHOTGUN_TEXTURE := preload("res://assets/sprites/weapon/shotgun.png")
 const AK47_TEXTURE := preload("res://assets/sprites/weapon/ak47.png")
+const KATANA_TEXTURE := preload("res://assets/sprites/weapon/Katana.png")
 
 func _ready() -> void:
 	collision_layer = 0
@@ -22,8 +23,10 @@ func _ready() -> void:
 			visual.texture = SHOTGUN_TEXTURE
 		&"ak47":
 			visual.texture = AK47_TEXTURE
+		&"katana":
+			visual.texture = KATANA_TEXTURE
 
-	visual.scale = Vector2(0.05, 0.05)
+	visual.scale = Vector2(0.075, 0.075) if weapon_type == &"katana" else Vector2(0.05, 0.05)
 	visual.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	add_child(visual)
 
@@ -51,8 +54,12 @@ func _physics_process(delta: float) -> void:
 		return
 	global_position = hit.position
 	var body: Node = hit.collider
-	if body.is_in_group("police") and body.has_method("knock_down"):
-		body.knock_down()
+	# A thrown katana is lethal; a thrown gun only knocks the first policeman down.
+	if body.is_in_group("police"):
+		if weapon_type == &"katana" and body.has_method("kill_permanently"):
+			body.kill_permanently()
+		elif body.has_method("knock_down"):
+			body.knock_down()
 	_flying = false
 	remove_from_group("thrown_weapons")
 	add_to_group("weapon_pickups")
