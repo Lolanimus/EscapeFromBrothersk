@@ -8,6 +8,8 @@ const PISTOL_TEXTURE := preload("res://assets/sprites/weapon/Pistol.png")
 const SHOTGUN_TEXTURE := preload("res://assets/sprites/weapon/shotgun.png")
 const AK47_TEXTURE := preload("res://assets/sprites/weapon/ak47.png")
 const KATANA_TEXTURE := preload("res://assets/sprites/weapon/Katana.png")
+## A flying katana spins three turns per second; it stops where it lands.
+const KATANA_SPIN_SPEED := TAU * 3.0
 
 func _ready() -> void:
 	collision_layer = 0
@@ -44,6 +46,8 @@ func launch(direction: Vector2, speed: float, source: CollisionObject2D = null) 
 func _physics_process(delta: float) -> void:
 	if not _flying:
 		return
+	if weapon_type == &"katana":
+		$Visual.rotation += KATANA_SPIN_SPEED * delta
 	var destination := global_position + _direction * _speed * delta
 	var query := PhysicsRayQueryParameters2D.create(global_position, destination, 11)
 	if is_instance_valid(_source):

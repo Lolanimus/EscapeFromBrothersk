@@ -15,6 +15,7 @@ func _run_tests() -> void:
 	await _test_configured_speed_and_empty_gun_recovery()
 	await _test_katana_kills_only_first_police_and_is_recoverable()
 	await _test_environment_stops_katana_without_kills()
+	await _test_katana_throw_plays_swing_and_spins_the_blade()
 	quit(_failures)
 
 
@@ -200,6 +201,38 @@ func _test_environment_stops_katana_without_kills() -> void:
 			"a %s stops the thrown katana, which kills nobody, shows impact and lies on the floor" % (
 				"wall" if path_y == 350.0 else "closed door"))
 		await _finish_level(level)
+
+
+func _test_katana_throw_plays_swing_and_spins_the_blade() -> void:
+	var level := await _start_level()
+	var player := level.get_node("Player") as Player
+	player.global_position = level.get_node("Pickups/Katana").global_position
+	await _press("interact")
+	player.global_position = Vector2(550, 350)
+	(level.get_node("Enemies/Enemy1") as Node2D).global_position = Vector2(550, 1000)
+	await physics_frame
+	await _aim_and_throw(player)
+	var effect := player.get_node("KatanaSlashVFX") as CanvasItem
+	_expect(player.skin.animation == &"katana_right" and player.skin.is_playing() and not effect.visible,
+		"throwing the katana plays the katana swing toward the aim without the slash effect")
+	var flying := get_nodes_in_group("thrown_weapons")
+	if flying.size() == 1:
+		var blade := flying[0].get_node("Visual") as Node2D
+		var spin_before := blade.rotation
+		for frame in range(3):
+			await physics_frame
+		_expect(not is_equal_approx(blade.rotation, spin_before), "the thrown katana spins while flying")
+		await create_timer(0.8).timeout
+		var resting := blade.rotation
+		for frame in range(3):
+			await physics_frame
+		_expect(get_nodes_in_group("thrown_weapons").is_empty() and is_equal_approx(blade.rotation, resting),
+			"the katana stops spinning once it lands")
+	else:
+		_expect(false, "the thrown katana spins while flying")
+	_expect(player.skin.animation == &"idle_fists_side" and not player.skin.is_playing(),
+		"after the throw swing the empty-handed player returns to the idle fists pose")
+	await _finish_level(level)
 
 
 func _floor_weapons(weapon_type: StringName) -> Array[Node]:

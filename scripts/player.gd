@@ -391,18 +391,23 @@ func _set_loaded_rounds(weapon_type: StringName, rounds: int) -> void:
 func _throw_active_weapon() -> void:
 	if active_weapon not in [&"pistol", &"shotgun", &"ak47", &"katana"]:
 		return
+	var direction := Vector2.RIGHT.rotated(aim_pivot.global_rotation)
 	var thrown := ThrownWeaponScript.new()
 	thrown.weapon_type = active_weapon
 	thrown.loaded_rounds = get_loaded_rounds()
 	get_tree().current_scene.add_child(thrown)
 	thrown.global_position = global_position
-	thrown.launch(Vector2.RIGHT.rotated(aim_pivot.global_rotation), thrown_weapon_speed, self)
-	if active_weapon == &"katana":
+	thrown.launch(direction, thrown_weapon_speed, self)
+	var threw_katana := active_weapon == &"katana"
+	if threw_katana:
 		carried_melee_weapon = &""
 	else:
 		_set_loaded_rounds(active_weapon, 0)
 		carried_ranged_weapon = &""
 	_equip(_melee_weapon())
+	# The throwing arm uses the katana swing; only a real swing shows the lethal slash effect.
+	if threw_katana:
+		_play_katana_animation(direction, false)
 
 
 # Q toggles between the carried gun and the melee side of the loadout.
@@ -508,7 +513,7 @@ func _add_slash_frames(frames: SpriteFrames, animation: StringName, sheet: Textu
 		frames.add_frame(animation, frame)
 
 
-func _play_katana_animation(direction: Vector2) -> void:
+func _play_katana_animation(direction: Vector2, show_slash_effect: bool = true) -> void:
 	var animation: StringName
 	if absf(direction.x) >= absf(direction.y):
 		animation = &"katana_right" if direction.x >= 0.0 else &"katana_left"
@@ -522,7 +527,7 @@ func _play_katana_animation(direction: Vector2) -> void:
 	_katana_vfx.animation = animation
 	_katana_vfx.position = KATANA_VFX_SHEETS[animation][2]
 	_katana_vfx.frame = 0
-	_katana_vfx.show()
+	_katana_vfx.visible = show_slash_effect
 	skin.play(animation)
 
 
