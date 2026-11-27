@@ -40,9 +40,12 @@ driven by input in `tests/test_gameplay_feedback.gd` (only Enemy1 is kept of the
   carried weapons, `Loaded: x/y`, `EMPTY`, choke progress and the Level Complete
   overlay are asserted by the same suite.
 - Audio: the repository has no audio assets, so `scripts/feedback_audio.gd`
-  generates one short 16-bit `AudioStreamWAV` tone per cue the first time it is
-  needed and caches it. Cues differ in pitch sweep, length (0.03-0.7 s) and wave
-  shape (sine, square, saw, seeded noise). The level adds one `FeedbackAudio` node;
+  synthesises one short 16-bit `AudioStreamWAV` per cue the first time it is
+  needed and caches it. Each cue layers seeded, low-pass-filtered noise (gun
+  cracks, hits, swooshes, scrapes) with sine parts (body thumps, metal rings, a
+  whistle, a completion chime) under fast exponential decays or swells, so the
+  placeholders resemble real sounds and stay distinct (0.03-0.75 s). Samples are
+  soft-limited at a modest master gain and played at -8 dB. The level adds one `FeedbackAudio` node;
   gameplay code calls `play_cue(context, cue, position)`, which finds the nearest
   ancestor's `FeedbackAudio`, plays the tone through `AudioStreamPlayer2D`
   (positional) or `AudioStreamPlayer` (interface cues), and emits
