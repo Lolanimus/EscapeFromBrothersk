@@ -117,7 +117,7 @@ func _press_interact() -> void:
 
 
 func _has_pickup_feedback() -> bool:
-	for child in root.get_children():
+	for child in current_scene.find_children("*", "CanvasLayer", true, false):
 		if child is CanvasLayer:
 			for label in child.get_children():
 				if label is Label and label.text == "Magazine collected!":

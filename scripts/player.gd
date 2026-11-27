@@ -628,7 +628,9 @@ func _set_reserve_magazines(weapon_type: StringName, count: int) -> void:
 
 func _show_pickup_feedback(message: String) -> void:
 	var layer := CanvasLayer.new()
-	get_tree().root.add_child(layer)
+	layer.name = "PickupFeedback"
+	# Owned by the player, so a checkpoint restore discards feedback from the previous attempt.
+	add_child(layer)
 
 	var label := Label.new()
 	label.text = message
