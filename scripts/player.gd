@@ -7,6 +7,21 @@ const RangedWeapon := preload("res://scripts/ranged_weapon.gd")
 const ThrownWeaponScript := preload("res://scripts/thrown_weapon.gd")
 const SHOTGUN_TEXTURE := preload("res://assets/sprites/weapon/shotgun.png")
 const AK47_TEXTURE := preload("res://assets/sprites/weapon/ak47.png")
+const KATANA_SWING_SHEETS := {
+	&"katana_right": preload("res://assets/sprites/main character/attack/rightAttack/katana_slash_right.png"),
+	&"katana_left": preload("res://assets/sprites/main character/attack/leftAttack/katana_slash_left.png"),
+	&"katana_up": preload("res://assets/sprites/main character/attack/backsideAttack/katana_slash_up.png"),
+	&"katana_down": preload("res://assets/sprites/main character/attack/FrontalAttack/katana_slash_down.png"),
+}
+const KATANA_VFX_SHEETS := {
+	&"katana_right": [preload("res://assets/sprites/main character/attack/rightAttack/katana_slash_right_vfx.png"), [0, 145, 300, 480, 665, 850], Vector2(30, -3)],
+	&"katana_left": [preload("res://assets/sprites/main character/attack/leftAttack/katana_slash_left_vfx.png"), [0, 140, 295, 475, 670, 830], Vector2(-30, -3)],
+	&"katana_up": [preload("res://assets/sprites/main character/attack/backsideAttack/katana_slash_up_vfx.png"), [0, 140, 287, 460, 660, 830], Vector2(0, -30)],
+	&"katana_down": [preload("res://assets/sprites/main character/attack/FrontalAttack/katana_slash_down_vfx.png"), [0, 155, 310, 485, 685, 850], Vector2(0, 28)],
+}
+# The six painted frames are separated by uneven horizontal gaps.
+const KATANA_FRAME_STARTS := [0, 240, 530, 800, 1128, 1460]
+const KATANA_SWING_SCALE := Vector2(0.22, 0.22)
 const FRONT_SPRITE_SCALE := Vector2(0.036772487, 0.033333333)
 const ACTION_SPRITE_SCALE := Vector2(0.075, 0.075)
 const SKIN_BASE_POSITION := Vector2(0.0, -1.0)
@@ -14,6 +29,7 @@ const SIDE_MUZZLE_OFFSET := Vector2(21.0, -13.0)
 const REAR_MUZZLE_OFFSET := Vector2(11.0, -16.0)
 const CHOKE_DURATION := 3.0
 const CHOKE_DISTANCE := 64.0
+const SWING_OBSTACLE_MASK := 1 | 8 # Prison walls and closed door barriers.
 
 @export_range(0.0, 1000.0, 1.0) var speed: float = 280.0:
 	set(value):
@@ -26,6 +42,7 @@ const CHOKE_DISTANCE := 64.0
 @export_range(0.0, 4000.0, 1.0) var ak47_projectile_speed: float = 1200.0
 @export_range(0.0, 10.0, 0.01) var ak47_firing_cadence: float = 0.1
 @export_range(0.0, 4000.0, 1.0) var thrown_weapon_speed: float = 800.0
+@export_range(0.0, 10.0, 0.01) var katana_swing_cadence: float = 0.45
 
 var active_weapon: StringName = &"fists"
 ## The one carried gun (&"" when none); fists are always available besides it.
@@ -33,6 +50,7 @@ var carried_ranged_weapon: StringName = &""
 ## The one carried melee weapon (&"katana"), or &"" so fists fill the melee side.
 var carried_melee_weapon: StringName = &""
 var _pistol_cooldown_remaining := 0.0
+var _katana_cooldown_remaining := 0.0
 var _attack_animation_playing := false
 var _last_facing: StringName = &"side"
 var _last_side_faces_right := false
@@ -54,6 +72,8 @@ var ak47_magazines: int = 0
 var shotgun_bullet: int = 6
 var ak47_bullet: int = 31
 var _held_gun: Sprite2D
+var _katana_vfx := AnimatedSprite2D.new()
+var _katana_vfx_bounds: Dictionary[StringName, Rect2] = {}
 
 const MAX_MAGAZINES_PER_WEAPON := 4
 
@@ -72,6 +92,10 @@ func _process(_delta: float) -> void:
 	stats_label.text += "\nShotgun magazines: " + str(shotgun_magazines)
 	stats_label.text += "\nAK-47 magazines: " + str(ak47_magazines)
 	stats_label.text += "\nActive: " + String(active_weapon)
+	stats_label.text += "\n1  %s    2  %s" % [
+		String(_melee_weapon()).capitalize(),
+		String(carried_ranged_weapon).capitalize() if carried_ranged_weapon != &"" else "-",
+	]
 	if active_weapon in [&"pistol", &"shotgun", &"ak47"]:
 		stats_label.text += "\nLoaded: %d/%d" % [get_loaded_rounds(), RangedWeapon.capacity(active_weapon)]
 		if get_loaded_rounds() == 0:
@@ -99,6 +123,7 @@ func _ready() -> void:
 	aim_pivot.add_child(_held_gun)
 	_update_held_gun()
 	$CanvasLayer/RestartButton.pressed.connect(_restart_level)
+	_add_katana_animations()
 	skin.animation_finished.connect(_on_skin_animation_finished)
 	skin.frame_changed.connect(_update_skin_frame_offset)
 	_show_stationary_pose()
@@ -130,6 +155,7 @@ func _physics_process(delta: float) -> void:
 		_update_movement_animation(Vector2.ZERO)
 		return
 	_pistol_cooldown_remaining = maxf(_pistol_cooldown_remaining - delta, 0.0)
+	_katana_cooldown_remaining = maxf(_katana_cooldown_remaining - delta, 0.0)
 	if Input.is_action_just_pressed("interact"):
 		_acquire_nearest_weapon()
 		_collect_nearest_magazine()
@@ -137,6 +163,10 @@ func _physics_process(delta: float) -> void:
 		_throw_active_weapon()
 	if Input.is_action_just_pressed("switch_weapon"):
 		_switch_weapon()
+	elif Input.is_action_just_pressed("equip_melee"):
+		_equip(_melee_weapon())
+	elif Input.is_action_just_pressed("equip_ranged") and carried_ranged_weapon != &"":
+		_equip(carried_ranged_weapon)
 	if (
 		(Input.is_action_pressed("shoot") if active_weapon == &"ak47" else Input.is_action_just_pressed("shoot"))
 		and active_weapon in [&"pistol", &"shotgun", &"ak47"]
@@ -156,6 +186,8 @@ func _physics_process(delta: float) -> void:
 			&"ak47": _pistol_cooldown_remaining = ak47_firing_cadence
 	elif Input.is_action_just_pressed("shoot") and active_weapon == &"fists":
 		_punch_targeted_policeman()
+	elif Input.is_action_just_pressed("shoot") and active_weapon == &"katana" and is_zero_approx(_katana_cooldown_remaining):
+		_swing_katana()
 	if Input.is_action_just_pressed("reload"):
 		_reload_active_weapon()
 
@@ -240,14 +272,10 @@ func _acquire_nearest_weapon() -> void:
 	if rounds != 0 and _get_reserve_magazines(incoming_type) >= MAX_MAGAZINES_PER_WEAPON:
 		return
 	_drop_carried_ranged_weapon()
-	active_weapon = incoming_type
 	carried_ranged_weapon = incoming_type
-	_set_loaded_rounds(active_weapon, rounds if rounds >= 0 else RangedWeapon.capacity(active_weapon))
-	_update_held_gun()
+	_set_loaded_rounds(incoming_type, rounds if rounds >= 0 else RangedWeapon.capacity(incoming_type))
 	nearest_pickup.queue_free()
-	_update_movement_animation(
-		Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	)
+	_equip(incoming_type)
 
 
 # The katana fills the melee slot without touching the carried gun; only one katana exists.
@@ -255,10 +283,8 @@ func _acquire_katana(pickup: Node2D) -> void:
 	if carried_melee_weapon == &"katana":
 		return
 	carried_melee_weapon = &"katana"
-	active_weapon = &"katana"
 	pickup.queue_free()
-	_update_held_gun()
-	_update_movement_animation(Input.get_vector("move_left", "move_right", "move_up", "move_down"))
+	_equip(&"katana")
 
 
 # Fists are the melee side of the loadout whenever no katana is carried.
@@ -371,16 +397,22 @@ func _throw_active_weapon() -> void:
 	thrown.launch(Vector2.RIGHT.rotated(aim_pivot.global_rotation), thrown_weapon_speed, self)
 	_set_loaded_rounds(active_weapon, 0)
 	carried_ranged_weapon = &""
-	active_weapon = _melee_weapon()
-	_update_held_gun()
-	_update_movement_animation(Input.get_vector("move_left", "move_right", "move_up", "move_down"))
+	_equip(_melee_weapon())
 
 
 # Q toggles between the carried gun and the melee side of the loadout.
+# Keys 1 and 2 are direct shortcuts to the melee side and the carried gun.
 func _switch_weapon() -> void:
 	if carried_ranged_weapon == &"":
 		return
-	active_weapon = _melee_weapon() if active_weapon == carried_ranged_weapon else carried_ranged_weapon
+	_equip(_melee_weapon() if active_weapon == carried_ranged_weapon else carried_ranged_weapon)
+
+
+# Makes one weapon of the loadout active, cutting short any attack animation in progress.
+func _equip(weapon_type: StringName) -> void:
+	active_weapon = weapon_type
+	_attack_animation_playing = false
+	_katana_vfx.hide()
 	_update_held_gun()
 	_update_movement_animation(Input.get_vector("move_left", "move_right", "move_up", "move_down"))
 
@@ -408,6 +440,87 @@ func _play_attack_animation(side_animation: StringName, up_animation: StringName
 	return aims_up
 
 
+# One katana slash kills every living policeman inside the slash effect's rectangular
+# footprint, unless a wall or closed door stands between him and the player.
+func _swing_katana() -> void:
+	_katana_cooldown_remaining = katana_swing_cadence
+	var direction := Vector2.RIGHT.rotated(aim_pivot.global_rotation)
+	_play_katana_animation(direction)
+	var hit_rect := _katana_vfx_bounds[_katana_vfx.animation]
+	var facing := Vector2(signf(direction.x), 0.0) if absf(direction.x) >= absf(direction.y) else Vector2(0.0, signf(direction.y))
+	for candidate in get_tree().get_nodes_in_group("police"):
+		var policeman := candidate as Enemy
+		if policeman == null or policeman.life_state == &"dead":
+			continue
+		if facing.dot(to_local(policeman.global_position)) < 0.0:
+			continue
+		if not hit_rect.has_point(_katana_vfx.to_local(policeman.global_position)):
+			continue
+		var query := PhysicsRayQueryParameters2D.create(
+			global_position, policeman.global_position, SWING_OBSTACLE_MASK
+		)
+		query.hit_from_inside = true
+		if get_world_2d().direct_space_state.intersect_ray(query).is_empty():
+			policeman.kill_permanently()
+
+
+func _add_katana_animations() -> void:
+	skin.sprite_frames = skin.sprite_frames.duplicate()
+	_katana_vfx.name = "KatanaSlashVFX"
+	_katana_vfx.sprite_frames = SpriteFrames.new()
+	_katana_vfx.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_katana_vfx.scale = Vector2(0.64, 0.64)
+	_katana_vfx.z_index = 1
+	_katana_vfx.hide()
+	add_child(_katana_vfx)
+	for animation: StringName in KATANA_SWING_SHEETS:
+		_add_slash_frames(skin.sprite_frames, animation, KATANA_SWING_SHEETS[animation], KATANA_FRAME_STARTS)
+		var effect: Array = KATANA_VFX_SHEETS[animation]
+		_add_slash_frames(_katana_vfx.sprite_frames, animation, effect[0], effect[1])
+		# Measure the full visible sweep in sprite-local coordinates, excluding transparent padding.
+		var bounds := Rect2()
+		for index in _katana_vfx.sprite_frames.get_frame_count(animation):
+			var frame := _katana_vfx.sprite_frames.get_frame_texture(animation, index)
+			var visible := Rect2(frame.get_image().get_used_rect())
+			if not visible.has_area():
+				continue
+			visible.position -= frame.get_size() * 0.5
+			bounds = bounds.merge(visible) if bounds.has_area() else visible
+		_katana_vfx_bounds[animation] = bounds
+
+
+func _add_slash_frames(frames: SpriteFrames, animation: StringName, sheet: Texture2D, starts: Array) -> void:
+	frames.add_animation(animation)
+	frames.set_animation_loop(animation, false)
+	frames.set_animation_speed(animation, 24.0)
+	for index in starts.size():
+		var left: int = starts[index]
+		var right: int = starts[index + 1] if index + 1 < starts.size() else sheet.get_width()
+		var frame := AtlasTexture.new()
+		frame.atlas = sheet
+		frame.region = Rect2(left, 0, right - left, sheet.get_height())
+		frame.filter_clip = true
+		frames.add_frame(animation, frame)
+
+
+func _play_katana_animation(direction: Vector2) -> void:
+	var animation: StringName
+	if absf(direction.x) >= absf(direction.y):
+		animation = &"katana_right" if direction.x >= 0.0 else &"katana_left"
+	else:
+		animation = &"katana_down" if direction.y >= 0.0 else &"katana_up"
+	_attack_animation_playing = true
+	_held_gun.hide()
+	skin.scale = KATANA_SWING_SCALE
+	skin.flip_h = false
+	skin.stop()
+	_katana_vfx.animation = animation
+	_katana_vfx.position = KATANA_VFX_SHEETS[animation][2]
+	_katana_vfx.frame = 0
+	_katana_vfx.show()
+	skin.play(animation)
+
+
 func _punch_targeted_policeman() -> void:
 	_play_attack_animation(&"punch_side", &"punch_up")
 	var attack_direction := Vector2.RIGHT.rotated(aim_pivot.global_rotation)
@@ -431,10 +544,15 @@ func _punch_targeted_policeman() -> void:
 
 
 func _on_skin_animation_finished() -> void:
-	if skin.animation not in [&"fire_pistol_side", &"fire_pistol_up", &"punch_side", &"punch_up"]:
+	if (
+		skin.animation not in [&"fire_pistol_side", &"fire_pistol_up", &"punch_side", &"punch_up"]
+		and not KATANA_SWING_SHEETS.has(skin.animation)
+	):
 		return
 
 	_attack_animation_playing = false
+	_katana_vfx.hide()
+	_update_held_gun()
 	_update_movement_animation(
 		Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	)
@@ -444,6 +562,8 @@ func _update_skin_frame_offset() -> void:
 	skin.position = SKIN_BASE_POSITION
 	if skin.animation == &"walk_down":
 		skin.position.y += -1.0 if skin.frame == 0 else 1.0
+	elif _katana_vfx.visible and skin.animation == _katana_vfx.animation:
+		_katana_vfx.frame = skin.frame
 
 
 # Called by enemy bullets when they hit the player.
@@ -456,6 +576,7 @@ func take_police_projectile_hit() -> void:
 		is_dead = true
 		velocity = Vector2.ZERO
 		skin.stop()
+		_katana_vfx.hide()
 		$CanvasLayer/DeathNotice.show()
 		$CanvasLayer/RestartButton.show()
 		$CanvasLayer/RestartButton.grab_focus()

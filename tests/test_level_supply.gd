@@ -84,8 +84,10 @@ func _test_placed_magazines_guarantee_a_twenty_percent_surplus() -> void:
 	var level := await _start_level()
 	var police_count := _police(level).size()
 	var placed_weapons := _placed_weapon_types(level)
-	_expect(placed_weapons == [&"ak47", &"pistol", &"shotgun"],
-		"the pistol, shotgun and AK-47 are deliberately placed (found %s)" % [placed_weapons])
+	_expect(placed_weapons == [&"ak47", &"katana", &"pistol", &"shotgun"],
+		"the pistol, shotgun, AK-47 and katana are deliberately placed (found %s)" % [placed_weapons])
+	# The katana needs no ammunition, so only the placed guns need a magazine surplus.
+	placed_weapons.erase(&"katana")
 	var magazines := _placed_magazines(level)
 	var player_start: Vector2 = level.get_node("Player").global_position
 	for magazine in magazines:

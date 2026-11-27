@@ -144,15 +144,11 @@ func _test_inactive_carried_gun_still_counts_its_loaded_magazine() -> void:
 	await _finish_level(level)
 
 
-# Story 17 owns the real katana; a bare katana pickup is enough to prove the melee slot.
+# Uses the real katana placed in the starting cell by story 17.
 func _test_katana_fills_the_melee_slot_beside_the_gun() -> void:
 	var level := await _start_level()
 	var player := level.get_node("Player") as Player
-	var katana := WeaponPickup.new()
-	katana.weapon_type = &"katana"
-	katana.position = Vector2(290, 600)
-	katana.add_to_group("weapon_pickups")
-	level.get_node("Pickups").add_child(katana)
+	var katana := level.get_node("Pickups/Katana")
 	level.get_node("Pickups/Pistol").set("loaded_rounds", 5)
 	await _acquire_placed(level, "Pistol")
 	player.global_position = katana.global_position

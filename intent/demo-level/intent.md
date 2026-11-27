@@ -9,7 +9,7 @@ The project needs a basic gameplay demo that can be applied to concrete levels. 
 
 Create a Hotline Miami-like, top-down 2D prison level with 6–8 rooms and 21–30 policemen. The player starts unarmed in a cell, moves with WASD, aims with the mouse, and must permanently kill every policeman before the prison exit unlocks. Knocked-down policemen still count as alive. The level includes a cell block, central corridor, guard office, showers or storage area, exercise yard, exit, and one alternate side passage.
 
-The player attacks with left click, throws the active weapon with right click, picks up or swaps the nearest weapon with E, switches between the carried melee and ranged weapons with Q, reloads with R, and restarts from the checkpoint with Backspace. The camera follows the player and shifts slightly toward the mouse cursor.
+The player attacks with left click, throws the active weapon with right click, picks up or swaps the nearest weapon with E, switches between the carried melee and ranged weapons with Q (1 and 2 jump straight to the melee or ranged side), reloads with R, and restarts from the checkpoint with Backspace. The camera follows the player and shifts slightly toward the mouse cursor.
 
 There are five weapon types: fists, pistol, shotgun, AK-47, and katana. Fists are always available. The player can carry one katana and one ranged weapon at the same time. Police use pistol, shotgun, or AK-47 and have unlimited ammunition.
 
@@ -31,7 +31,7 @@ The player starts with 100 motivation, displayed as a motivation bar. Motivation
 
 Fists knock down a policeman. A knocked-down policeman recovers after 15 seconds, with a visible warning during the final 3 seconds. The player can permanently kill him by shooting him or by holding left click to choke him for three uninterrupted seconds. The player cannot move while choking. Releasing the button, attempting to move, or taking damage cancels the choke and resets its progress.
 
-The katana performs a short, forward-facing area swing that instantly kills every policeman inside the arc. Walls block the swing, while its exact reach and angle remain configurable. Throwing the katana kills the first policeman it hits. Throwing a ranged weapon hits only the first policeman, knocks him down, and leaves the weapon on the floor with its remaining ammunition. Dead and unconscious police look different. Characters do not block one another.
+The katana performs a short, forward-facing swing that instantly kills every exposed policeman inside the slash effect's rectangular footprint. Walls block the swing. Throwing the katana kills the first policeman it hits. Throwing a ranged weapon hits only the first policeman, knocks him down, and leaves the weapon on the floor with its remaining ammunition. Dead and unconscious police look different. Characters do not block one another.
 
 Automatic doors block sight while closed, open when approached by the player or a policeman, and remain open for the rest of the attempt.
 
@@ -58,7 +58,7 @@ Use Godot 4.7 and GDScript. Use placeholder art rather than polished art. The de
 - Which ranged weapons and compatible magazine types are deliberately placed in the level?
 - Selected ranged swap rule (story 09): the replaced gun drops at the player's position keeping exactly its loaded rounds; retained magazines stay with the player.
 - What happens when the player tries to collect a magazine type already at the four-magazine limit?
-- What are the katana swing's exact reach, arc angle, and cadence?
-- Where is the katana placed in the level?
+- Selected katana swing (story 17): the visible directional slash effect sizes its rectangular hit area, and swings default to a configurable 0.45 seconds apart.
+- Selected katana placement (story 17): the starting cell at (225, 267), 42 pixels below the player spawn.
 - Story 12 selects `res://scenes/next_level.tscn`, a placeholder destination, configurable on the level's `next_level_scene` property.
 - What are the exact dimensions and geometry of the rooms and alternate passage?

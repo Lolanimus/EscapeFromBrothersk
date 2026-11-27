@@ -30,6 +30,7 @@
 [ext_resource type="PackedScene" uid="uid://c7llhut3utob2" path="res://scenes/ShotgunMagazine.tscn" id="23_pm3ni"]
 [ext_resource type="Texture2D" path="res://assets/sprites/weapon/ak47.png" id="24_ak47"]
 [ext_resource type="Texture2D" path="res://assets/sprites/weapon/shotgun.png" id="25_shotgun"]
+[ext_resource type="Texture2D" path="res://assets/sprites/weapon/Katana.png" id="26_katana"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_player"]
 animations = [{
@@ -281,6 +282,18 @@ theme_override_font_sizes/font_size = 22
 text = "Restart level"
 
 [node name="Pickups" type="Node2D" parent="." unique_id=272605550]
+
+[node name="Katana" type="Area2D" parent="Pickups" groups=["weapon_pickups"]]
+position = Vector2(225, 267)
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("6_pickup")
+weapon_type = &"katana"
+
+[node name="Visual" type="Sprite2D" parent="Pickups/Katana"]
+texture_filter = 1
+scale = Vector2(0.075, 0.075)
+texture = ExtResource("26_katana")
 
 [node name="Pistol" type="Area2D" parent="Pickups" unique_id=1674564713 groups=["weapon_pickups"]]
 position = Vector2(290, 225)

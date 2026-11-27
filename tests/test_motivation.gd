@@ -38,6 +38,8 @@ func _test_start_and_police_damage() -> void:
 	await _hit(level)
 	check(player.motivation == 75, "a real police bullet removes 25 motivation")
 	var hud := player.get_node("CanvasLayer/StatsLabel") as Label
+	# process_frame fires before Node._process, so wait one more frame for the HUD refresh.
+	await process_frame
 	check(hud.text.contains("75/100"), "HUD reflects the current motivation")
 	level.queue_free()
 	await process_frame

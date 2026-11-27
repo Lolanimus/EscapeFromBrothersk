@@ -39,6 +39,8 @@ func _run_test() -> void:
 	click.global_position = mouse_motion.global_position
 	click.pressed = true
 	Input.parse_input_event(click)
+	# Let the buffered click reach the input state before the physics steps that read it.
+	await process_frame
 	await physics_frame
 	await physics_frame
 	click = InputEventMouseButton.new()
