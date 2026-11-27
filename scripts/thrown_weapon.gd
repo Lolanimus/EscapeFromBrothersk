@@ -7,6 +7,7 @@ var _flying := false
 const PISTOL_TEXTURE := preload("res://assets/sprites/weapon/Pistol.png")
 const SHOTGUN_TEXTURE := preload("res://assets/sprites/weapon/shotgun.png")
 const AK47_TEXTURE := preload("res://assets/sprites/weapon/ak47.png")
+const Feedback := preload("res://scripts/feedback_audio.gd")
 const KATANA_TEXTURE := preload("res://assets/sprites/weapon/Katana.png")
 ## A flying katana spins three turns per second; it stops where it lands.
 const KATANA_SPIN_SPEED := TAU * 3.0
@@ -67,6 +68,7 @@ func _physics_process(delta: float) -> void:
 	_flying = false
 	remove_from_group("thrown_weapons")
 	add_to_group("weapon_pickups")
+	Feedback.play_cue(self, &"thrown_impact", global_position)
 	var cue := Label.new()
 	cue.name = "ImpactFeedback"
 	cue.text = "IMPACT"

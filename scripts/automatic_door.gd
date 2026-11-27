@@ -2,6 +2,8 @@ extends Node2D
 
 signal opened
 
+const Feedback := preload("res://scripts/feedback_audio.gd")
+
 @export var opening_size := Vector2(20.0, 100.0)
 @export var trigger_size := Vector2(140.0, 140.0)
 
@@ -59,4 +61,5 @@ func _open() -> void:
 	is_open = true
 	_barrier_shape.set_deferred("disabled", true)
 	_visual.visible = false
+	Feedback.play_cue(self, &"door_open", global_position)
 	opened.emit()
