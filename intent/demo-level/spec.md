@@ -30,7 +30,7 @@ The following Fibonacci estimates are provisional. No story exceeds 8 points; im
 14. As a player, I want to acquire and fire an AK-47, so that I can use an automatic ranged weapon with its own magazine type. **Estimate: 5 points.**
 15. As a player, I want permanently killed policemen to drop their guns with full magazines, so that combat can replenish my limited ranged ammunition. **Estimate: 5 points.**
 16. As a player, I want placed magazines to provide a guaranteed ammunition surplus, so that completing the mandatory elimination objective does not depend on police drops. **Estimate: 3 points.**
-17. As a player, I want the katana swing to kill every policeman in its unobstructed arc, so that the melee weapon can handle grouped enemies. **Estimate: 5 points.**
+17. As a player, I want the katana swing to kill every policeman in its unobstructed rectangular hit area, so that the melee weapon can handle grouped enemies. **Estimate: 5 points.**
 18. As a player, I want to throw my active weapon, so that guns can knock down a policeman and a katana can kill one at range. **Estimate: 5 points.**
 19. As a player, I want death or manual restart to restore the complete level-start checkpoint quickly, so that each retry begins from a consistent state. **Estimate: 8 points.**
 20. As a player, I want clear HUD and audio feedback for my current action and state, so that I can understand weapons, ammunition, motivation, combat states, and objectives. **Estimate: 8 points.**
@@ -44,7 +44,7 @@ The following Fibonacci estimates are provisional. No story exceeds 8 points; im
 - The player starts unarmed in the cell.
 - Every policeman must be permanently dead before the exit unlocks. A knocked-down policeman remains alive and continues to block completion.
 - Reaching the unlocked exit displays Level Complete. Further input loads a configured next-level scene.
-- WASD controls movement and the mouse controls aim. Left click performs the active attack. Right click throws the active weapon. E picks up or swaps the nearest weapon. Q switches between the carried melee and ranged weapons. R reloads the active ranged weapon. Backspace manually restarts from the checkpoint.
+- WASD controls movement and the mouse controls aim. Left click performs the active attack. Right click throws the active weapon. E picks up or swaps the nearest weapon. Q switches between the carried melee and ranged weapons; 1 and 2 are direct shortcuts to the melee side and the carried ranged weapon. R reloads the active ranged weapon. Backspace manually restarts from the checkpoint.
 - The camera follows the player and shifts slightly toward the mouse cursor.
 - There are five weapon types: fists, pistol, shotgun, AK-47, and katana.
 - Fists are always available. The player may carry one katana and one ranged weapon simultaneously. Q changes which carried weapon is active.
@@ -86,7 +86,7 @@ The following Fibonacci estimates are provisional. No story exceeds 8 points; im
 - A knocked-down policeman can be permanently killed by shooting or choking.
 - Choking requires the player to hold left click beside the knocked-down policeman for three uninterrupted seconds. The player cannot move during the choke.
 - Releasing left click, attempting to move, or taking damage cancels the choke and resets its progress.
-- The katana makes a short, forward-facing area swing. Every policeman inside the swing arc dies instantly, and walls block the swing.
+- The katana makes a short, forward-facing swing. Every exposed policeman whose center is inside the slash effect's rectangular footprint dies instantly; walls and closed doors block the swing for police behind them.
 - Throwing the katana kills the first policeman it hits.
 - Throwing a ranged weapon knocks down only the first policeman it hits, then leaves the weapon on the floor with its remaining loaded ammunition.
 - Living, knocked-down, and dead police have distinct placeholder presentation.
@@ -115,8 +115,8 @@ The following Fibonacci estimates are provisional. No story exceeds 8 points; im
 - Magazine tests verify incompatible magazine types, full-magazine pickups, the capacities of 12, 6, and 31, retention for unequipped weapons, the four-magazine limit including the loaded magazine, destructive reloads, empty-magazine destruction, and HUD counts.
 - Level-supply tests verify that guaranteed placed magazines provide at least the required 20% ammunition surplus after rounding to whole magazines, without counting police drops.
 - Loot tests verify that every permanently killed policeman drops his gun with one full compatible magazine and that interacting with a duplicate carried weapon collects its magazine when capacity permits.
-- Loadout tests verify the one-melee and one-ranged limits, Q switching, the selected ranged swap rule, and fallback to fists.
-- Melee tests verify fist knockdown, 15-second recovery, the final 3-second warning, shooting a downed policeman, the uninterrupted three-second choke, choke cancellation, katana area kills, wall-blocked swings, and lethal katana throws.
+- Loadout tests verify the one-melee and one-ranged limits, Q switching, the 1 and 2 shortcuts, the selected ranged swap rule, and fallback to fists.
+- Melee tests verify fist knockdown, 15-second recovery, the final 3-second warning, shooting a downed policeman, the uninterrupted three-second choke, choke cancellation, katana rectangular-area kills, wall- and door-blocked swings, and lethal katana throws.
 - Motivation tests verify the 100-point maximum, 25-point damage events, 10-point restoration after permanent kills, the 100-point restoration cap, and death at zero.
 - Checkpoint tests verify that death and Backspace restore every captured system to the level-start state and complete in under one second.
 - Feedback tests verify that the HUD and placeholder states reflect active gameplay state and that each required audio cue is triggered. Tests do not judge final asset quality.
@@ -151,10 +151,10 @@ The following Fibonacci estimates are provisional. No story exceeds 8 points; im
 - Player firing cadence defaults to 0.25 seconds for pistol, 0.8 for shotgun, and 0.1 for AK-47. Police AK-47 cadence defaults to 0.1 seconds; police pistol/shotgun defaults remain 0.6/1.2 seconds. All are configurable.
 - The demo prison holds 24 policemen: 13 pistol, 7 shotgun, and 4 AK-47 users (story 16).
 - The pistol, shotgun, and AK-47 are deliberately placed. Placed full magazines are 3 pistol (36 rounds), 5 shotgun (30 blasts), and 1 AK-47 (31 bullets), each covering 24 one-hit kills plus 20% (29 rounds) after rounding up to whole magazines (story 16).
-- Selected ranged swap rule (story 09): when E acquires a different ranged weapon, the replaced gun is dropped at the player's position as a weapon pickup that keeps exactly its loaded rounds, as a thrown gun does, and the player keeps all retained magazines. No ammunition is created or destroyed. A swap that would push the incoming type past four magazines is refused and the carried gun is kept.
+- Selected ranged swap rule (story 09): when E acquires a different ranged weapon, the replaced gun is dropped at the player's position as a weapon pickup that keeps exactly its loaded rounds, as a thrown gun does, and the player keeps all retained magazines. No ammunition is created or destroyed. A swap that would push the incoming type past four magazines is refused and the carried gun is kept. A loaded gun counts toward the magazine limit even while the katana or fists are active.
 - The result of attempting to collect a magazine when that magazine type is already at its four-magazine limit remains undecided.
-- The katana swing's exact reach, arc angle, and cadence remain undecided.
-- The katana's level placement remains undecided.
+- Selected katana swing (story 17): the hit rectangle covers the visible sweep of the selected directional slash effect in front of the player. Walls and closed doors block individual targets. The default cooldown is 0.45 seconds, configurable on the player.
+- Selected katana placement (story 17): the demo katana is in the starting cell at (225, 267), 42 pixels below the player spawn and within E pickup range. It fills the melee slot without displacing a carried gun.
 - Story 12 loads `res://scenes/next_level.tscn` by default, a placeholder for the next level. Each prison level can override the exported `next_level_scene` PackedScene. A fresh key press or mouse-button press continues; mouse motion, releases, and key echoes do not. Gameplay processing stops during Level Complete.
 - Exact room dimensions, geometry, and alternate-passage layout remain undecided.
 - The intent says the existing player collides with surroundings, while the current player implementation directly updates position and clamps it to the viewport. Environmental collision behavior must be verified before implementation relies on it.
@@ -165,4 +165,4 @@ The following Fibonacci estimates are provisional. No story exceeds 8 points; im
 
 ## Current delivery scope
 
-Stories 06, 13, and 14 are implemented. Story 09 implements the carried loadout: one ranged slot, one melee slot that holds the katana or falls back to fists, Q switching, and the selected ranged swap rule. Story 18 currently implements ranged-weapon throwing only, as requested by the user; throwing the carried gun falls back to the melee side of the loadout. Story 17 katana combat remains deferred. The complete katana throw criterion in story 18 remains open. These deferrals do not change the full-demo requirements above.
+Stories 06, 13, and 14 are implemented. Story 09 implements the carried loadout: one ranged slot, one melee slot that holds the katana or falls back to fists, Q switching (with 1 and 2 as direct shortcuts), and the selected ranged swap rule. Story 17 implements the placed katana and its rectangular-area swing. Story 18 currently implements ranged-weapon throwing only, as requested by the user; throwing the carried gun falls back to the melee side of the loadout. The complete katana throw criterion in story 18 remains open. These deferrals do not change the full-demo requirements above.

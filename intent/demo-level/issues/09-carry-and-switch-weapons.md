@@ -35,7 +35,10 @@
 - `tests/test_weapon_loadout.gd` covers Q switching with the physical Q key, active-only
   attack and throw, duplicate magazine collection while the gun is inactive, the swap
   rule round trip, the refused swap at the magazine limit, the inactive gun's loaded
-  magazine limit, and the melee slot using a bare katana pickup.
-- Left for story 17: the katana's art, level placement, swing attack, and the katana
-  side of Q/left click doing damage. Left for story 18: throwing the katana. With the
-  katana active, left and right click currently do nothing.
+  magazine limit, and the melee slot using the placed katana pickup (a bare stand-in
+  pickup until story 17 placed the real one).
+- Story 17 (SCRUM-214) later added the katana's art, level placement, and swing on
+  top of these slots, plus keys 1 (`equip_melee`) and 2 (`equip_ranged`) as direct
+  shortcuts to the melee side and the carried gun; Q and the swap rule are unchanged.
+  Left for story 18: throwing the katana, so right click does nothing while the katana
+  is active.

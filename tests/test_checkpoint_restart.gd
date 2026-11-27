@@ -28,6 +28,7 @@ func _test_backspace_discards_loot_thrown_guns_doors_and_exit_progress() -> void
 	for policeman in _police(level):
 		if policeman != enemy:
 			policeman.kill_permanently()
+	await _press("interact")
 	player.global_position = level.get_node("Pickups/Pistol").global_position
 	await _press("interact")
 	enemy.global_position = Vector2(650, 350)
@@ -44,9 +45,10 @@ func _test_backspace_discards_loot_thrown_guns_doors_and_exit_progress() -> void
 		await physics_frame
 	var doors_opened := get_nodes_in_group("automatic_doors").any(func(door: Node) -> bool: return door.is_open)
 	_expect(enemy.life_state == &"dead" and not get_nodes_in_group("police_drops").is_empty()
-		and not level.has_node("Pickups/Pistol") and doors_opened and level.exit_unlocked
+		and not level.has_node("Pickups/Pistol") and not level.has_node("Pickups/Katana")
+		and player.carried_melee_weapon == &"katana" and doors_opened and level.exit_unlocked
 		and player.pistol_bullet < 12,
-		"the attempt kills police, drops loot, throws a gun, opens a door and unlocks the exit")
+		"the attempt takes the katana, kills police, drops loot, throws a gun, opens a door and unlocks the exit")
 	await _restart_with_backspace(level, "Backspace while alive")
 
 
@@ -91,6 +93,7 @@ func _expect_level_start(level: Node, label: String) -> void:
 	var enemy := level.get_node("Enemies/Enemy1") as Enemy
 	_expect(not player.is_dead and player.motivation == Player.MAX_MOTIVATION
 		and player.global_position.is_equal_approx(START_POSITION) and player.active_weapon == &"fists"
+		and player.carried_melee_weapon == &"" and player.carried_ranged_weapon == &""
 		and player.pistol_magazines == 0 and player.shotgun_magazines == 0 and player.ak47_magazines == 0,
 		"%s respawns the player at the start with full motivation, fists and no magazines" % label)
 	_expect(enemy.life_state == &"living" and not enemy.is_alerted,
@@ -100,9 +103,10 @@ func _expect_level_start(level: Node, label: String) -> void:
 		and police.all(func(policeman: Enemy) -> bool: return policeman.life_state == &"living" and not policeman.is_alerted),
 		"%s restores all %d posted policemen alive and unalerted" % [label, police.size()])
 	_expect(level.has_node("Pickups/Pistol") and level.has_node("Pickups/Shotgun") and level.has_node("Pickups/AK47")
+		and level.has_node("Pickups/Katana")
 		and level.has_node("PistolMagazine") and level.has_node("ShotgunMagazine") and level.has_node("AK-47Magazine")
 		and get_nodes_in_group("police_drops").is_empty() and get_nodes_in_group("thrown_weapons").is_empty()
-		and get_nodes_in_group("weapon_pickups").size() == 3,
+		and get_nodes_in_group("weapon_pickups").size() == 4,
 		"%s restores placed pickups and removes loot and thrown guns" % label)
 	_expect(get_nodes_in_group("automatic_doors").all(func(door: Node) -> bool: return not door.is_open)
 		and not level.exit_unlocked and not level.level_complete
